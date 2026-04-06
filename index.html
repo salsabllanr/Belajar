@@ -515,13 +515,13 @@
     .topbar {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       padding: 12px 20px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
-      z-index: 100;
-      /* Di bawah sidebar tapi di atas konten */
+      z-index: 90;
     }
 
     .topbar-left {
@@ -1622,7 +1622,7 @@
     <!-- MAIN -->
     <main class="main">
       <header class="topbar">
-        <div class="topbar">
+        <div class="topbar-left">
           <button class="hamburger" id="hamburger" onclick="openSidebar()">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -1630,10 +1630,11 @@
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
-          <div class="page-title">Dashboard</div>
+          <div class="page-title" id="page-title">Dashboard</div>
         </div>
-
-        <div class="sidebar-backdrop" id="backdrop" onclick="closeSidebar()"></div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="openActivityModal()">&#xff0b; Tambah Kegiatan</button>
+        </div>
       </header>
 
       <div class="content">
