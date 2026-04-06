@@ -1,1402 +1,2346 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GSA UNMUL — Activity Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root {
-  --blue: #2563eb;
-  --blue-light: #dbeafe;
-  --blue-dark: #1d4ed8;
-  --red: #ef4444;
-  --yellow: #f59e0b;
-  --green: #10b981;
-  --purple: #8b5cf6;
-  --bg: #f1f5f9;
-  --surface: #ffffff;
-  --surface2: #f8fafc;
-  --surface3: #f1f5f9;
-  --text: #0f172a;
-  --text2: #475569;
-  --text3: #94a3b8;
-  --border: rgba(0,0,0,0.07);
-  --border2: rgba(0,0,0,0.12);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow: 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
-  --r: 14px;
-  --r-sm: 9px;
-  --sidebar-w: 256px;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GSA UNMUL — Activity Tracker</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --blue: #2563eb;
+      --blue-light: #dbeafe;
+      --blue-dark: #1d4ed8;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --green: #10b981;
+      --purple: #8b5cf6;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --surface2: #f8fafc;
+      --surface3: #f1f5f9;
+      --text: #0f172a;
+      --text2: #475569;
+      --text3: #94a3b8;
+      --border: rgba(0, 0, 0, 0.07);
+      --border2: rgba(0, 0, 0, 0.12);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+      --r: 14px;
+      --r-sm: 9px;
+      --sidebar-w: 256px;
+    }
 
-* { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 14px;
-  min-height: 100%; /* Ubah dari 100vh */
-  display: flex;
-  flex-direction: column;
-}
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      min-height: 100%;
+      /* Ubah dari 100vh */
+      display: flex;
+      flex-direction: column;
+    }
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width:5px; height:5px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:10px; }
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
 
-/* ── LOADING ── */
-#loading-screen {
-  position:fixed; inset:0; background:#fff;
-  display:flex; align-items:center; justify-content:center;
-  flex-direction:column; gap:20px; z-index:9999;
-  transition:opacity .4s ease;
-}
-.spin-ring {
-  width:44px; height:44px; border:3px solid #e2e8f0;
-  border-top-color:var(--blue); border-radius:50%;
-  animation:spin .8s linear infinite;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
-.loading-brand {
-  font-family:'Syne',sans-serif; font-size:18px; font-weight:800;
-  background:linear-gradient(135deg,var(--blue),var(--purple));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-}
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-/* ── AUTH SCREEN ── */
-#auth-screen {
-  display:none; position:fixed; inset:0; z-index:8888;
-  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);
-  align-items:center; justify-content:center;
-  overflow:hidden;
-}
-#auth-screen.show { display:flex; }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
 
-.auth-bg-dots {
-  position:absolute; inset:0; overflow:hidden; opacity:.15;
-  background-image:radial-gradient(circle,#fff 1px,transparent 1px);
-  background-size:30px 30px;
-}
+    /* ── LOADING ── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 9999;
+      transition: opacity .4s ease;
+    }
 
-.auth-card {
-  position:relative; z-index:1;
-  background:rgba(255,255,255,0.04);
-  backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:24px;
-  padding:48px 44px;
-  width:100%; max-width:440px;
-  margin:20px;
-  box-shadow:0 32px 80px rgba(0,0,0,.4);
-}
+    .spin-ring {
+      width: 44px;
+      height: 44px;
+      border: 3px solid #e2e8f0;
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
 
-.auth-logo {
-  text-align:center; margin-bottom:32px;
-}
-.auth-logo-mark {
-  display:inline-flex; align-items:center; gap:4px; margin-bottom:12px;
-}
-.dot-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
-.dot-g { width:10px; height:10px; border-radius:50%; }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
-.auth-logo h1 {
-  font-family:'Syne',sans-serif; font-size:22px; font-weight:800;
-  color:#fff; margin-bottom:4px;
-}
-.auth-logo p { font-size:12px; color:rgba(255,255,255,.5); letter-spacing:.08em; text-transform:uppercase; }
+    .loading-brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-.auth-tabs {
-  display:flex; background:rgba(0,0,0,.3); border-radius:10px;
-  padding:3px; margin-bottom:28px;
-}
-.auth-tab {
-  flex:1; padding:9px; border:none; background:transparent;
-  color:rgba(255,255,255,.5); font-family:inherit; font-size:13px;
-  font-weight:600; cursor:pointer; border-radius:8px;
-  transition:all .2s; letter-spacing:.02em;
-}
-.auth-tab.active { background:rgba(255,255,255,.1); color:#fff; }
+    /* ── AUTH SCREEN ── */
+    #auth-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 8888;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-.auth-form { display:flex; flex-direction:column; gap:14px; }
-.auth-form-group { display:flex; flex-direction:column; gap:6px; }
-.auth-label { font-size:12px; font-weight:600; color:rgba(255,255,255,.6); letter-spacing:.06em; text-transform:uppercase; }
+    #auth-screen.show {
+      display: flex;
+    }
 
-.auth-input {
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-  border-radius:10px; padding:12px 16px; font-family:inherit; font-size:14px;
-  color:#fff; transition:all .2s; outline:none;
-}
-.auth-input::placeholder { color:rgba(255,255,255,.3); }
-.auth-input:focus { border-color:rgba(99,179,237,.6); background:rgba(255,255,255,.09); }
+    .auth-bg-dots {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      opacity: .15;
+      background-image: radial-gradient(circle, #fff 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
 
-.auth-btn {
-  margin-top:4px; padding:14px; border:none; border-radius:12px;
-  background:linear-gradient(135deg,var(--blue),var(--blue-dark));
-  color:#fff; font-family:inherit; font-size:14px; font-weight:700;
-  cursor:pointer; letter-spacing:.03em; transition:all .2s;
-  box-shadow:0 4px 20px rgba(37,99,235,.4);
-}
-.auth-btn:hover { transform:translateY(-1px); box-shadow:0 6px 28px rgba(37,99,235,.5); }
-.auth-btn:active { transform:translateY(0); }
-.auth-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+    .auth-card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 440px;
+      margin: 20px;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, .4);
+    }
 
-.auth-error {
-  background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.3);
-  border-radius:9px; padding:10px 14px; font-size:13px; color:#fca5a5;
-  display:none;
-}
-.auth-error.show { display:block; }
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
 
-/* ── APP ── */
-#app { display:none; }
-#app.show { display:flex; }
+    .auth-logo-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
 
-/* ── SIDEBAR ── */
-.sidebar {
-  position:fixed; top:0; left:0;
-  width:var(--sidebar-w); height:100vh;
-  background:var(--surface);
-  border-right:1px solid var(--border);
-  display:flex; flex-direction:column;
-  z-index:100; transition:transform .3s cubic-bezier(.4,0,.2,1);
-}
+    .dot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
 
-.sidebar-head {
-  padding:22px 20px 18px;
-  border-bottom:1px solid var(--border);
-}
-.brand { display:flex; align-items:center; gap:11px; }
-.brand-dots { display:grid; grid-template-columns:1fr 1fr; gap:3px; width:26px; }
-.brand-dot { width:11px; height:11px; border-radius:50%; }
-.brand-name { font-family:'Syne',sans-serif; font-size:17px; font-weight:800; }
-.brand-sub { font-size:10px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.1em; margin-top:1px; }
+    .dot-g {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
 
-.sidebar-nav { flex:1; padding:14px 12px; overflow-y:auto; }
-.nav-sect { margin-bottom:24px; }
-.nav-sect-label {
-  font-size:10px; font-weight:700; color:var(--text3);
-  text-transform:uppercase; letter-spacing:.12em;
-  padding:0 10px; margin-bottom:6px;
-}
-.nav-btn {
-  display:flex; align-items:center; gap:10px;
-  padding:10px 12px; border-radius:10px;
-  cursor:pointer; font-size:13.5px; font-weight:500;
-  color:var(--text2); transition:all .15s;
-  border:none; background:none; width:100%; text-align:left;
-  font-family:inherit;
-}
-.nav-btn:hover { background:var(--surface3); color:var(--text); }
-.nav-btn.active { background:#dbeafe; color:var(--blue); font-weight:600; }
-.nav-ico { width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; }
+    .auth-logo h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+    }
 
-.sidebar-foot {
-  padding:16px 20px;
-  border-top:1px solid var(--border);
-}
-.user-info {
-  display:flex; align-items:center; gap:10px; margin-bottom:12px;
-}
-.user-avatar {
-  width:34px; height:34px; border-radius:50%;
-  background:linear-gradient(135deg,var(--blue),var(--purple));
-  display:flex; align-items:center; justify-content:center;
-  font-size:13px; font-weight:700; color:#fff; flex-shrink:0;
-}
-.user-name { font-size:13px; font-weight:600; }
-.user-email { font-size:11px; color:var(--text3); }
-.logout-btn {
-  display:flex; align-items:center; gap:8px;
-  width:100%; padding:9px 12px; border-radius:9px;
-  border:1px solid var(--border); background:transparent;
-  color:var(--text2); font-family:inherit; font-size:12.5px;
-  font-weight:600; cursor:pointer; transition:all .15s;
-}
-.logout-btn:hover { background:#fee2e2; color:var(--red); border-color:#fca5a5; }
+    .auth-logo p {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .5);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
-.db-status { display:flex; align-items:center; gap:6px; margin-top:10px; }
-.db-dot { width:6px; height:6px; border-radius:50%; background:#cbd5e1; }
-.db-dot.on { background:var(--green); }
-.db-lbl { font-size:11px; color:var(--text3); }
+    .auth-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, .3);
+      border-radius: 10px;
+      padding: 3px;
+      margin-bottom: 28px;
+    }
 
-/* ── MAIN ── */
-.main {
-  margin-left: var(--sidebar-w);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  width: calc(100% - var(--sidebar-w)); /* Pastikan lebar pas */
-  transition: margin-left .3s ease;
-}
+    .auth-tab {
+      flex: 1;
+      padding: 9px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, .5);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all .2s;
+      letter-spacing: .02em;
+    }
 
-.topbar {
-  position:sticky; top:0;
-  background:rgba(255,255,255,.85);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-  padding:14px 28px;
-  display:flex; align-items:center; justify-content:space-between;
-  z-index:90;
-}
-.topbar-left { display:flex; align-items:center; gap:14px; }
-.page-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; }
-.hamburger {
-  display: none; 
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  cursor: pointer;
-  font-size: 20px;
-  align-items: center;
-  justify-content: center;
-  z-index: 101; /* Harus di atas sidebar backdrop */
-  transition: all 0.2s;
-}
+    .auth-tab.active {
+      background: rgba(255, 255, 255, .1);
+      color: #fff;
+    }
 
-.hamburger:hover { background: var(--surface3); }
-.topbar-right { display:flex; align-items:center; gap:10px; }
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
 
-.btn {
-  display:inline-flex; align-items:center; gap:6px;
-  padding:9px 18px; border-radius:10px;
-  font-size:13px; font-weight:600; cursor:pointer;
-  border:none; font-family:inherit; transition:all .15s;
-}
-.btn-primary { background:var(--blue); color:#fff; box-shadow:0 2px 8px rgba(37,99,235,.3); }
-.btn-primary:hover { background:var(--blue-dark); transform:translateY(-1px); box-shadow:0 4px 14px rgba(37,99,235,.4); }
-.btn-primary:active { transform:translateY(0); }
-.btn-ghost { background:var(--surface); color:var(--text2); border:1px solid var(--border); }
-.btn-ghost:hover { background:var(--surface2); border-color:var(--border2); }
-.btn:disabled { opacity:.5; cursor:not-allowed; transform:none !important; }
+    .auth-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-/* ── CONTENT ── */
-.content { padding:28px; flex:1; }
+    .auth-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, .6);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
 
-.view { display:none; animation:fadeUp .25s ease; }
-.view.active { display:block; }
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(8px); }
-  to { opacity:1; transform:translateY(0); }
-}
+    .auth-input {
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-family: inherit;
+      font-size: 14px;
+      color: #fff;
+      transition: all .2s;
+      outline: none;
+    }
 
-/* ── STATS ── */
-.stats-grid {
-  display:grid; grid-template-columns:repeat(4,1fr);
-  gap:14px; margin-bottom:24px;
-}
-.stat-card {
-  background:var(--surface); border-radius:var(--r);
-  padding:20px 22px; box-shadow:var(--shadow-sm);
-  border:1px solid var(--border); position:relative; overflow:hidden;
-}
-.stat-card::before {
-  content:''; position:absolute; top:0; left:0;
-  width:4px; height:100%; border-radius:2px 0 0 2px;
-}
-.stat-card.blue::before { background:var(--blue); }
-.stat-card.green::before { background:var(--green); }
-.stat-card.yellow::before { background:var(--yellow); }
-.stat-card.red::before { background:var(--red); }
-.stat-icon { font-size:20px; margin-bottom:10px; }
-.stat-label { font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px; }
-.stat-value { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; line-height:1; }
-.stat-sub { font-size:11px; color:var(--text3); margin-top:4px; }
+    .auth-input::placeholder {
+      color: rgba(255, 255, 255, .3);
+    }
 
-/* ── SECTION HDR ── */
-.sec-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
-.sec-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
+    .auth-input:focus {
+      border-color: rgba(99, 179, 237, .6);
+      background: rgba(255, 255, 255, .09);
+    }
 
-/* ── TABLE ── */
-.tbl-wrap {
-  background: var(--surface);
-  border-radius: var(--r);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
-  margin-bottom: 20px;
-  width: 100%;
-  overflow-x: auto; /* Ini kunci agar tabel bisa di-scroll horizontal */
-  -webkit-overflow-scrolling: touch;
-}
-table { width:100%; border-collapse:collapse; min-width:600px; }
-thead { background:var(--surface2); }
-th {
-  padding:12px 18px; text-align:left; font-size:11px; font-weight:700;
-  color:var(--text3); text-transform:uppercase; letter-spacing:.1em;
-  white-space:nowrap;
-}
-td { padding:14px 18px; font-size:13.5px; border-top:1px solid var(--border); vertical-align:middle; }
-tr:hover td { background:#f8fafc; }
+    .auth-btn {
+      margin-top: 4px;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .03em;
+      transition: all .2s;
+      box-shadow: 0 4px 20px rgba(37, 99, 235, .4);
+    }
 
-/* ── CHIP ── */
-.chip {
-  display:inline-flex; align-items:center;
-  padding:4px 11px; border-radius:20px;
-  font-size:11px; font-weight:700; letter-spacing:.03em; white-space:nowrap;
-}
-.c-done { background:#d1fae5; color:#065f46; }
-.c-progress { background:#dbeafe; color:#1e40af; }
-.c-plan { background:#fef3c7; color:#92400e; }
-.c-cancel { background:#fee2e2; color:#991b1b; }
-.c-FGD { background:#ede9fe; color:#5b21b6; }
-.c-seminar { background:#e0f2fe; color:#0c4a6e; }
-.c-sharing { background:#dcfce7; color:#14532d; }
-.c-other { background:var(--surface3); color:var(--text2); }
+    .auth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(37, 99, 235, .5);
+    }
 
-.act-btns { display:flex; gap:6px; }
-.ico-btn {
-  width:32px; height:32px; border-radius:8px;
-  border:none; background:transparent; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  font-size:14px; transition:background .15s;
-}
-.ico-btn:hover { background:var(--surface3); }
+    .auth-btn:active {
+      transform: translateY(0);
+    }
 
-/* ── MODAL ── */
-.overlay {
-  display:none; position:fixed; inset:0;
-  background:rgba(15,23,42,.5); backdrop-filter:blur(4px);
-  z-index:200; align-items:center; justify-content:center; padding:20px;
-}
-.overlay.open { display:flex; }
-.modal {
-  background: var(--surface);
-  border-radius: 20px;
-  padding: 24px; /* Kurangi padding sedikit */
-  width: 100%;
-  max-width: 540px;
-  max-height: 90vh; /* Maksimal tinggi 90% layar */
-  overflow-y: auto; /* Scroll dalam modal jika konten panjang */
-  position: relative;
-}
-@keyframes slideUp {
-  from { transform:translateY(24px); opacity:0; }
-  to { transform:translateY(0); opacity:1; }
-}
-.modal-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:24px; }
-.form-group { margin-bottom:16px; }
-.form-label {
-  display:block; font-size:11px; font-weight:700;
-  color:var(--text3); text-transform:uppercase; letter-spacing:.1em; margin-bottom:7px;
-}
-input, select, textarea {
-  width:100%; padding:11px 14px;
-  border-radius:10px; border:1.5px solid var(--border2);
-  font-family:inherit; font-size:14px; color:var(--text);
-  background:var(--surface2); transition:all .15s; outline:none;
-}
-input:focus, select:focus, textarea:focus {
-  border-color:var(--blue); background:var(--surface);
-  box-shadow:0 0 0 3px rgba(37,99,235,.1);
-}
-textarea { resize:vertical; min-height:88px; }
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.modal-foot { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+    .auth-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-/* ── FILTER BAR ── */
-.filter-bar {
-  display:flex; align-items:center; gap:8px; margin-bottom:18px;
-  flex-wrap:wrap;
-}
-.search-wrap {
-  position:relative; flex:1; min-width:200px; max-width:280px;
-}
-.search-ico {
-  position:absolute; left:13px; top:50%; transform:translateY(-50%);
-  font-size:14px; pointer-events:none;
-}
-.search-input {
-  width:100%; padding:9px 14px 9px 38px;
-  border-radius:20px; border:1.5px solid var(--border2);
-  font-size:13px; background:var(--surface);
-}
-.filter-pill {
-  padding:7px 15px; border-radius:20px;
-  border:1.5px solid var(--border2); font-size:12px; font-weight:600;
-  cursor:pointer; background:var(--surface); color:var(--text2);
-  transition:all .15s; font-family:inherit;
-}
-.filter-pill:hover { border-color:var(--blue); color:var(--blue); }
-.filter-pill.active { background:var(--blue); border-color:var(--blue); color:#fff; }
+    .auth-error {
+      background: rgba(239, 68, 68, .15);
+      border: 1px solid rgba(239, 68, 68, .3);
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #fca5a5;
+      display: none;
+    }
 
-/* ── CALENDAR ── */
-.cal-nav { display:flex; align-items:center; gap:16px; margin-bottom:18px; }
-.cal-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
-.cal-grid {
-  background:var(--surface); border-radius:var(--r);
-  box-shadow:var(--shadow-sm); border:1px solid var(--border); overflow:hidden;
-}
-.cal-hdr { display:grid; grid-template-columns:repeat(7,1fr); background:var(--surface2); }
-.cal-day-name {
-  padding:10px 4px; text-align:center;
-  font-size:11px; font-weight:700; color:var(--text3);
-  text-transform:uppercase; letter-spacing:.08em;
-}
-.cal-body { display:grid; grid-template-columns:repeat(7,1fr); }
-.cal-cell {
-  min-height:100px; padding:8px 6px;
-  border:0.5px solid var(--border); position:relative;
-}
-.cal-date-num {
-  font-size:13px; font-weight:600; color:var(--text2);
-  width:28px; height:28px; display:flex; align-items:center;
-  justify-content:center; border-radius:50%; margin-bottom:4px;
-}
-.cal-date-num.today { background:var(--blue); color:#fff; }
-.cal-date-num.other { color:var(--text3); }
-.cal-evt {
-  font-size:10.5px; padding:3px 7px; border-radius:5px;
-  margin-bottom:2px; white-space:nowrap; overflow:hidden;
-  text-overflow:ellipsis; cursor:pointer; font-weight:500;
-}
-.cal-evt.done { background:#d1fae5; color:#065f46; }
-.cal-evt.progress { background:#dbeafe; color:#1e40af; }
-.cal-evt.plan { background:#fef3c7; color:#92400e; }
-.cal-evt.cancel { background:#fee2e2; color:#991b1b; }
+    .auth-error.show {
+      display: block;
+    }
 
-/* ── ROADMAP ── */
-.quad-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:28px; }
-.quad-card { background:var(--surface); border-radius:var(--r); box-shadow:var(--shadow-sm); border:1px solid var(--border); overflow:hidden; }
-.quad-hdr { padding:14px 20px; font-size:13px; font-weight:700; color:#fff; display:flex; align-items:center; justify-content:space-between; }
-.quad-hdr.q1 { background:linear-gradient(135deg,#2563eb,#1d4ed8); }
-.quad-hdr.q2 { background:linear-gradient(135deg,#10b981,#059669); }
-.quad-hdr.q3 { background:linear-gradient(135deg,#ef4444,#dc2626); }
-.quad-hdr.q4 { background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
-.quad-count { background:rgba(255,255,255,.2); padding:3px 10px; border-radius:12px; font-size:11px; }
-.quad-body { padding:14px 20px; }
-.plan-item {
-  padding:10px 0; border-bottom:1px solid var(--border);
-  display:flex; align-items:flex-start; gap:10px;
-}
-.plan-item:last-child { border-bottom:none; }
-.plan-bullet { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
-.plan-info { flex:1; }
-.plan-name { font-size:13px; font-weight:600; margin-bottom:2px; }
-.plan-date { font-size:11px; color:var(--text3); }
-.plan-del { margin-left:auto; background:none; border:none; cursor:pointer; font-size:13px; opacity:.3; transition:opacity .15s; }
-.plan-del:hover { opacity:1; color:var(--red); }
+    /* ── APP ── */
+    #app {
+      display: none;
+    }
 
-/* ── PROGRESS ── */
-.prog-item { margin-bottom:18px; }
-.prog-label { display:flex; justify-content:space-between; font-size:13px; margin-bottom:7px; font-weight:500; }
-.prog-bar { height:9px; background:var(--surface3); border-radius:5px; overflow:hidden; }
-.prog-fill { height:100%; border-radius:5px; transition:width .6s ease; }
+    #app.show {
+      display: flex;
+    }
 
-/* ── LOG ── */
-.log-stack { display:flex; flex-direction:column; gap:12px; }
-.log-card {
-  background:var(--surface); border-radius:var(--r);
-  box-shadow:var(--shadow-sm); border:1px solid var(--border);
-  padding:18px 22px; display:flex; gap:16px; align-items:flex-start;
-}
-.log-date-pill {
-  flex-shrink:0; width:52px; text-align:center;
-  background:var(--surface2); border-radius:10px; padding:8px 4px;
-  border:1px solid var(--border);
-}
-.log-day { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; line-height:1; }
-.log-mon { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; }
-.log-body { flex:1; }
-.log-title { font-weight:700; font-size:14px; margin-bottom:5px; }
-.log-meta { font-size:12px; color:var(--text2); margin-bottom:7px; display:flex; gap:12px; flex-wrap:wrap; }
-.log-desc { font-size:13px; color:var(--text3); line-height:1.6; }
-.log-side { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+    }
 
-/* ── EMPTY ── */
-.empty { text-align:center; padding:56px 20px; color:var(--text3); }
-.empty-ico { font-size:40px; margin-bottom:14px; }
-.empty-msg { font-size:15px; font-weight:600; margin-bottom:4px; }
-.empty-sub { font-size:13px; }
+    .sidebar-head {
+      padding: 22px 20px 18px;
+      border-bottom: 1px solid var(--border);
+    }
 
-/* ── TOAST ── */
-.toast {
-  position:fixed; bottom:24px; right:24px; z-index:999;
-  padding:13px 20px; border-radius:12px; font-size:13px; font-weight:600;
-  color:#fff; display:flex; align-items:center; gap:8px;
-  transform:translateY(80px); opacity:0;
-  transition:all .3s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 8px 30px rgba(0,0,0,.2);
-  max-width:340px;
-}
-.toast.show { transform:translateY(0); opacity:1; }
-.toast.ok { background:#10b981; }
-.toast.err { background:#ef4444; }
-.toast.info { background:#2563eb; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
 
-/* ── MOBILE OVERLAY ── */
-.sidebar-backdrop {
-  display:none; position:fixed; inset:0;
-  background:rgba(15,23,42,.4); z-index:99;
-}
+    .brand-dots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      width: 26px;
+    }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 960px) {
-  .main {
-    margin-left: 0;
-    width: 100%; /* Lebar penuh di mobile */
-  }
+    .brand-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
 
-  .sidebar {
-    transform: translateX(-100%);
-    width: 280px; /* Sedikit lebih lebar di mobile untuk kenyamanan */
-    height: 100%; /* Gunakan 100% bukan 100vh */
-    position: fixed;
-  }
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+    }
 
-  /* Perbaiki padding content agar tidak terlalu mepet */
-  .content {
-    padding: 16px;
-    padding-bottom: 80px; /* Ruang extra di bawah agar tidak tertutup */
-  }
+    .brand-sub {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-top: 1px;
+    }
 
-  /* Grid statistik jadi 2 kolom di tablet, 1 kolom di HP kecil */
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-}
+    .sidebar-nav {
+      flex: 1;
+      padding: 14px 12px;
+      overflow-y: auto;
+    }
 
-@media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr; /* 1 Kolom saja di HP kecil */
-  }
-  
-  .topbar {
-    padding: 10px 16px;
-  }
-  
-  .page-title {
-    font-size: 16px;
-  }
-}
-</style>
+    .nav-sect {
+      margin-bottom: 24px;
+    }
+
+    .nav-sect-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      padding: 0 10px;
+      margin-bottom: 6px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text2);
+      transition: all .15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .nav-btn:hover {
+      background: var(--surface3);
+      color: var(--text);
+    }
+
+    .nav-btn.active {
+      background: #dbeafe;
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .nav-ico {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .sidebar-foot {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .user-email {
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text2);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .logout-btn:hover {
+      background: #fee2e2;
+      color: var(--red);
+      border-color: #fca5a5;
+    }
+
+    .db-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .db-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #cbd5e1;
+    }
+
+    .db-dot.on {
+      background: var(--green);
+    }
+
+    .db-lbl {
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      width: calc(100% - var(--sidebar-w));
+      /* Pastikan lebar pas */
+      transition: margin-left .3s ease;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      /* Di bawah sidebar tapi di atas konten */
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .hamburger {
+      display: none;
+      /* Sembunyi di desktop */
+      background: var(--blue-light);
+      color: var(--blue);
+      border: none;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 12px;
+      z-index: 110;
+      /* Pastikan di atas elemen topbar lainnya */
+    }
+
+    @media (max-width: 960px) {
+      .hamburger {
+        display: flex;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: -280px;
+        /* Sembunyi ke kiri */
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+        visibility: hidden;
+      }
+
+      .sidebar.open {
+        transform: translateX(280px);
+        /* Geser masuk */
+        visibility: visible;
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      /* Overlay saat menu buka */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+      }
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: all .15s;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, .3);
+    }
+
+    .btn-primary:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, .4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface2);
+      border-color: var(--border2);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      padding: 28px;
+      flex: 1;
+    }
+
+    .view {
+      display: none;
+      animation: fadeUp .25s ease;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      padding: 20px 22px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      border-radius: 2px 0 0 2px;
+    }
+
+    .stat-card.blue::before {
+      background: var(--blue);
+    }
+
+    .stat-card.green::before {
+      background: var(--green);
+    }
+
+    .stat-card.yellow::before {
+      background: var(--yellow);
+    }
+
+    .stat-card.red::before {
+      background: var(--red);
+    }
+
+    .stat-icon {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+
+    /* ── SECTION HDR ── */
+    .sec-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .sec-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    /* ── TABLE ── */
+    .tbl-wrap {
+      background: var(--surface);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      width: 100%;
+      overflow-x: auto;
+      /* Ini kunci agar tabel bisa di-scroll horizontal */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    thead {
+      background: var(--surface2);
+    }
+
+    th {
+      padding: 12px 18px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 18px;
+      font-size: 13.5px;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* ── CHIP ── */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      white-space: nowrap;
+    }
+
+    .c-done {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .c-progress {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .c-plan {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .c-cancel {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .c-FGD {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+
+    .c-seminar {
+      background: #e0f2fe;
+      color: #0c4a6e;
+    }
+
+    .c-sharing {
+      background: #dcfce7;
+      color: #14532d;
+    }
+
+    .c-other {
+      background: var(--surface3);
+      color: var(--text2);
+    }
+
+    .act-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .ico-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: background .15s;
+    }
+
+    .ico-btn:hover {
+      background: var(--surface3);
+    }
+
+    /* ── MODAL ── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .5);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 24px;
+      /* Kurangi padding sedikit */
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      /* Maksimal tinggi 90% layar */
+      overflow-y: auto;
+      /* Scroll dalam modal jika konten panjang */
+      position: relative;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(24px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border2);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface2);
+      transition: all .15s;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--blue);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 88px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+    }
+
+    .search-ico {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 14px 9px 38px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border2);
+      font-size: 13px;
+      background: var(--surface);
+    }
+
+    .filter-pill {
+      padding: 7px 15px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border2);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text2);
+      transition: all .15s;
+      font-family: inherit;
+    }
+
+    .filter-pill:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .filter-pill.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    /* ── CALENDAR ── */
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .cal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .cal-grid {
+      background: var(--surface);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .cal-hdr {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: var(--surface2);
+    }
+
+    .cal-day-name {
+      padding: 10px 4px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .cal-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-cell {
+      min-height: 100px;
+      padding: 8px 6px;
+      border: 0.5px solid var(--border);
+      position: relative;
+    }
+
+    .cal-date-num {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin-bottom: 4px;
+    }
+
+    .cal-date-num.today {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .cal-date-num.other {
+      color: var(--text3);
+    }
+
+    .cal-evt {
+      font-size: 10.5px;
+      padding: 3px 7px;
+      border-radius: 5px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .cal-evt.done {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .cal-evt.progress {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .cal-evt.plan {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .cal-evt.cancel {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* ── ROADMAP ── */
+    .quad-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .quad-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .quad-hdr {
+      padding: 14px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .quad-hdr.q1 {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    .quad-hdr.q2 {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .quad-hdr.q3 {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .quad-hdr.q4 {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+
+    .quad-count {
+      background: rgba(255, 255, 255, .2);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+
+    .quad-body {
+      padding: 14px 20px;
+    }
+
+    .plan-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .plan-item:last-child {
+      border-bottom: none;
+    }
+
+    .plan-bullet {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .plan-info {
+      flex: 1;
+    }
+
+    .plan-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .plan-date {
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    .plan-del {
+      margin-left: auto;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      opacity: .3;
+      transition: opacity .15s;
+    }
+
+    .plan-del:hover {
+      opacity: 1;
+      color: var(--red);
+    }
+
+    /* ── PROGRESS ── */
+    .prog-item {
+      margin-bottom: 18px;
+    }
+
+    .prog-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 7px;
+      font-weight: 500;
+    }
+
+    .prog-bar {
+      height: 9px;
+      background: var(--surface3);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width .6s ease;
+    }
+
+    /* ── LOG ── */
+    .log-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .log-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      padding: 18px 22px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .log-date-pill {
+      flex-shrink: 0;
+      width: 52px;
+      text-align: center;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 8px 4px;
+      border: 1px solid var(--border);
+    }
+
+    .log-day {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .log-mon {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .log-body {
+      flex: 1;
+    }
+
+    .log-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .log-meta {
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 7px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .log-desc {
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 1.6;
+    }
+
+    .log-side {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    /* ── EMPTY ── */
+    .empty {
+      text-align: center;
+      padding: 56px 20px;
+      color: var(--text3);
+    }
+
+    .empty-ico {
+      font-size: 40px;
+      margin-bottom: 14px;
+    }
+
+    .empty-msg {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .empty-sub {
+      font-size: 13px;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      padding: 13px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .2);
+      max-width: 340px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.ok {
+      background: #10b981;
+    }
+
+    .toast.err {
+      background: #ef4444;
+    }
+
+    .toast.info {
+      background: #2563eb;
+    }
+
+    /* ── MOBILE OVERLAY ── */
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .4);
+      z-index: 99;
+    }
+
+    #sidebarOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #sidebarOverlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .main {
+        margin-left: 0;
+        width: 100%;
+        /* Lebar penuh di mobile */
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        /* Sedikit lebih lebar di mobile untuk kenyamanan */
+        height: 100%;
+        /* Gunakan 100% bukan 100vh */
+        position: fixed;
+      }
+
+      /* Perbaiki padding content agar tidak terlalu mepet */
+      .content {
+        padding: 16px;
+        padding-bottom: 80px;
+        /* Ruang extra di bawah agar tidak tertutup */
+      }
+
+      /* Grid statistik jadi 2 kolom di tablet, 1 kolom di HP kecil */
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+        /* 1 Kolom saja di HP kecil */
+      }
+
+      .topbar {
+        padding: 10px 16px;
+      }
+
+      .page-title {
+        font-size: 16px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- LOADING -->
-<div id="loading-screen">
-  <div class="spin-ring"></div>
-  <div class="loading-brand">GSA UNMUL</div>
-</div>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- AUTH -->
-<div id="auth-screen">
-  <div class="auth-bg-dots"></div>
-  <div class="auth-card">
-    <div class="auth-logo">
-      <div class="auth-logo-mark">
-        <div class="dot-grid">
-          <div class="dot-g" style="background:#2563eb"></div>
-          <div class="dot-g" style="background:#ef4444"></div>
-          <div class="dot-g" style="background:#f59e0b"></div>
-          <div class="dot-g" style="background:#10b981"></div>
+  <!-- LOADING -->
+  <div id="loading-screen">
+    <div class="spin-ring"></div>
+    <div class="loading-brand">GSA UNMUL</div>
+  </div>
+
+  <!-- AUTH -->
+  <div id="auth-screen">
+    <div class="auth-bg-dots"></div>
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">
+          <div class="dot-grid">
+            <div class="dot-g" style="background:#2563eb"></div>
+            <div class="dot-g" style="background:#ef4444"></div>
+            <div class="dot-g" style="background:#f59e0b"></div>
+            <div class="dot-g" style="background:#10b981"></div>
+          </div>
         </div>
+        <h1>GSA UNMUL</h1>
+        <p>Activity Tracker · Google Student Ambassador</p>
       </div>
-      <h1>GSA UNMUL</h1>
-      <p>Activity Tracker · Google Student Ambassador</p>
-    </div>
 
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="switchAuth('login')">Masuk</button>
-      <button class="auth-tab" id="tab-reg" onclick="switchAuth('register')">Daftar</button>
-    </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuth('login')">Masuk</button>
+        <button class="auth-tab" id="tab-reg" onclick="switchAuth('register')">Daftar</button>
+      </div>
 
-    <!-- LOGIN -->
-    <div id="form-login" class="auth-form">
-      <div class="auth-error" id="login-err"></div>
-      <div class="auth-form-group">
-        <label class="auth-label">Email</label>
-        <input class="auth-input" type="email" id="login-email" placeholder="email@example.com" autocomplete="email">
+      <!-- LOGIN -->
+      <div id="form-login" class="auth-form">
+        <div class="auth-error" id="login-err"></div>
+        <div class="auth-form-group">
+          <label class="auth-label">Email</label>
+          <input class="auth-input" type="email" id="login-email" placeholder="email@example.com" autocomplete="email">
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Password</label>
+          <input class="auth-input" type="password" id="login-pass" placeholder="••••••••"
+            autocomplete="current-password">
+        </div>
+        <button class="auth-btn" id="login-btn" onclick="doLogin()">Masuk ke Akun</button>
       </div>
-      <div class="auth-form-group">
-        <label class="auth-label">Password</label>
-        <input class="auth-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <button class="auth-btn" id="login-btn" onclick="doLogin()">Masuk ke Akun</button>
-    </div>
 
-    <!-- REGISTER -->
-    <div id="form-register" class="auth-form" style="display:none">
-      <div class="auth-error" id="reg-err"></div>
-      <div class="auth-form-group">
-        <label class="auth-label">Nama Lengkap</label>
-        <input class="auth-input" type="text" id="reg-name" placeholder="Nama kamu" autocomplete="name">
+      <!-- REGISTER -->
+      <div id="form-register" class="auth-form" style="display:none">
+        <div class="auth-error" id="reg-err"></div>
+        <div class="auth-form-group">
+          <label class="auth-label">Nama Lengkap</label>
+          <input class="auth-input" type="text" id="reg-name" placeholder="Nama kamu" autocomplete="name">
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Email</label>
+          <input class="auth-input" type="email" id="reg-email" placeholder="email@example.com" autocomplete="email">
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Password</label>
+          <input class="auth-input" type="password" id="reg-pass" placeholder="Min. 6 karakter"
+            autocomplete="new-password">
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Konfirmasi Password</label>
+          <input class="auth-input" type="password" id="reg-pass2" placeholder="Ulangi password"
+            autocomplete="new-password">
+        </div>
+        <button class="auth-btn" id="reg-btn" onclick="doRegister()">Buat Akun</button>
       </div>
-      <div class="auth-form-group">
-        <label class="auth-label">Email</label>
-        <input class="auth-input" type="email" id="reg-email" placeholder="email@example.com" autocomplete="email">
-      </div>
-      <div class="auth-form-group">
-        <label class="auth-label">Password</label>
-        <input class="auth-input" type="password" id="reg-pass" placeholder="Min. 6 karakter" autocomplete="new-password">
-      </div>
-      <div class="auth-form-group">
-        <label class="auth-label">Konfirmasi Password</label>
-        <input class="auth-input" type="password" id="reg-pass2" placeholder="Ulangi password" autocomplete="new-password">
-      </div>
-      <button class="auth-btn" id="reg-btn" onclick="doRegister()">Buat Akun</button>
     </div>
   </div>
-</div>
 
-<!-- APP -->
-<div id="app">
-  <div class="sidebar-backdrop" id="backdrop" onclick="closeSidebar()"></div>
+  <!-- APP -->
+  <div id="app">
+    <div class="sidebar-backdrop" id="backdrop" onclick="closeSidebar()"></div>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-head">
-      <div class="brand">
-        <div class="brand-dots">
-          <div class="brand-dot" style="background:#2563eb"></div>
-          <div class="brand-dot" style="background:#ef4444"></div>
-          <div class="brand-dot" style="background:#f59e0b"></div>
-          <div class="brand-dot" style="background:#10b981"></div>
-        </div>
-        <div>
-          <div class="brand-name">GSA UNMUL</div>
-          <div class="brand-sub">Activity Tracker</div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <div class="brand">
+          <div class="brand-dots">
+            <div class="brand-dot" style="background:#2563eb"></div>
+            <div class="brand-dot" style="background:#ef4444"></div>
+            <div class="brand-dot" style="background:#f59e0b"></div>
+            <div class="brand-dot" style="background:#10b981"></div>
+          </div>
+          <div>
+            <div class="brand-name">GSA UNMUL</div>
+            <div class="brand-sub">Activity Tracker</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <nav class="sidebar-nav">
-      <div class="nav-sect">
-        <div class="nav-sect-label">Menu Utama</div>
-        <button class="nav-btn active" onclick="goTo('dashboard')">
-          <span class="nav-ico">🏠</span> Dashboard
+      <nav class="sidebar-nav">
+        <div class="nav-sect">
+          <div class="nav-sect-label">Menu Utama</div>
+          <button class="nav-btn active" onclick="goTo('dashboard')">
+            <span class="nav-ico">🏠</span> Dashboard
+          </button>
+          <button class="nav-btn" onclick="goTo('activities')">
+            <span class="nav-ico">📋</span> Semua Kegiatan
+          </button>
+          <button class="nav-btn" onclick="goTo('calendar')">
+            <span class="nav-ico">📅</span> Kalender
+          </button>
+        </div>
+        <div class="nav-sect">
+          <div class="nav-sect-label">Perencanaan</div>
+          <button class="nav-btn" onclick="goTo('roadmap')">
+            <span class="nav-ico">🗺️</span> Roadmap &amp; Plan
+          </button>
+          <button class="nav-btn" onclick="goTo('log')">
+            <span class="nav-ico">📝</span> Log Kegiatan
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-info">
+          <div class="user-avatar" id="user-av">?</div>
+          <div>
+            <div class="user-name" id="user-name">—</div>
+            <div class="user-email" id="user-email">—</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">
+          <span>🚪</span> Keluar
         </button>
-        <button class="nav-btn" onclick="goTo('activities')">
-          <span class="nav-ico">📋</span> Semua Kegiatan
-        </button>
-        <button class="nav-btn" onclick="goTo('calendar')">
-          <span class="nav-ico">📅</span> Kalender
-        </button>
-      </div>
-      <div class="nav-sect">
-        <div class="nav-sect-label">Perencanaan</div>
-        <button class="nav-btn" onclick="goTo('roadmap')">
-          <span class="nav-ico">🗺️</span> Roadmap &amp; Plan
-        </button>
-        <button class="nav-btn" onclick="goTo('log')">
-          <span class="nav-ico">📝</span> Log Kegiatan
-        </button>
-      </div>
-    </nav>
-
-    <div class="sidebar-foot">
-      <div class="user-info">
-        <div class="user-avatar" id="user-av">?</div>
-        <div>
-          <div class="user-name" id="user-name">—</div>
-          <div class="user-email" id="user-email">—</div>
+        <div class="db-status">
+          <div class="db-dot" id="db-dot"></div>
+          <span class="db-lbl" id="db-lbl">Menghubungkan...</span>
         </div>
       </div>
-      <button class="logout-btn" onclick="doLogout()">
-        <span>🚪</span> Keluar
-      </button>
-      <div class="db-status">
-        <div class="db-dot" id="db-dot"></div>
-        <span class="db-lbl" id="db-lbl">Menghubungkan...</span>
-      </div>
-    </div>
-  </aside>
+    </aside>
 
-  <!-- MAIN -->
-  <main class="main">
-    <header class="topbar">
-      <div class="topbar-left">
-        <button class="hamburger" id="hamburger" onclick="openSidebar()">☰</button>
-        <div class="page-title" id="page-title">Dashboard</div>
-      </div>
-      <div class="topbar-right">
-        <button class="btn btn-primary" onclick="openActivityModal()">＋ Tambah</button>
-      </div>
-    </header>
+    <!-- MAIN -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar">
+          <button class="hamburger" id="hamburger" onclick="openSidebar()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="page-title">Dashboard</div>
+        </div>
 
-    <div class="content">
+        <div class="sidebar-backdrop" id="backdrop" onclick="closeSidebar()"></div>
+      </header>
 
-      <!-- DASHBOARD -->
-      <div class="view active" id="view-dashboard">
-        <div class="stats-grid">
-          <div class="stat-card blue">
-            <div class="stat-icon">📌</div>
-            <div class="stat-label">Total Kegiatan</div>
-            <div class="stat-value" id="st-total">—</div>
-            <div class="stat-sub">Semua tercatat</div>
+      <div class="content">
+
+        <!-- DASHBOARD -->
+        <div class="view active" id="view-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card blue">
+              <div class="stat-icon">📌</div>
+              <div class="stat-label">Total Kegiatan</div>
+              <div class="stat-value" id="st-total">—</div>
+              <div class="stat-sub">Semua tercatat</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-icon">✅</div>
+              <div class="stat-label">Selesai</div>
+              <div class="stat-value" id="st-done">—</div>
+              <div class="stat-sub">Terlaksana</div>
+            </div>
+            <div class="stat-card yellow">
+              <div class="stat-icon">🔄</div>
+              <div class="stat-label">Berjalan</div>
+              <div class="stat-value" id="st-prog">—</div>
+              <div class="stat-sub">Sedang proses</div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-icon">📆</div>
+              <div class="stat-label">Direncanakan</div>
+              <div class="stat-value" id="st-plan">—</div>
+              <div class="stat-sub">Akan datang</div>
+            </div>
           </div>
-          <div class="stat-card green">
-            <div class="stat-icon">✅</div>
-            <div class="stat-label">Selesai</div>
-            <div class="stat-value" id="st-done">—</div>
-            <div class="stat-sub">Terlaksana</div>
+
+          <div class="sec-hdr">
+            <div class="sec-title">Kegiatan Terbaru</div>
+            <button class="btn btn-ghost" onclick="goTo('activities')">Lihat semua →</button>
           </div>
-          <div class="stat-card yellow">
-            <div class="stat-icon">🔄</div>
-            <div class="stat-label">Berjalan</div>
-            <div class="stat-value" id="st-prog">—</div>
-            <div class="stat-sub">Sedang proses</div>
+          <div class="tbl-wrap" style="margin-bottom:28px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama Kegiatan</th>
+                  <th>Tanggal</th>
+                  <th>Jenis</th>
+                  <th>Status</th>
+                  <th>PIC</th>
+                </tr>
+              </thead>
+              <tbody id="dash-tbl"></tbody>
+            </table>
           </div>
-          <div class="stat-card red">
-            <div class="stat-icon">📆</div>
-            <div class="stat-label">Direncanakan</div>
-            <div class="stat-value" id="st-plan">—</div>
-            <div class="stat-sub">Akan datang</div>
+
+          <div class="sec-hdr">
+            <div class="sec-title">Progres Per Jenis</div>
+          </div>
+          <div id="prog-bars"></div>
+        </div>
+
+        <!-- ACTIVITIES -->
+        <div class="view" id="view-activities">
+          <div class="filter-bar">
+            <div class="search-wrap">
+              <span class="search-ico">🔍</span>
+              <input type="text" class="search-input" placeholder="Cari kegiatan..." id="search-inp"
+                oninput="renderActivities()">
+            </div>
+            <button class="filter-pill active" onclick="setFilter('all',this)">Semua</button>
+            <button class="filter-pill" onclick="setFilter('done',this)">Selesai</button>
+            <button class="filter-pill" onclick="setFilter('progress',this)">Berjalan</button>
+            <button class="filter-pill" onclick="setFilter('plan',this)">Direncanakan</button>
+            <button class="filter-pill" onclick="setFilter('cancel',this)">Dibatalkan</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama Kegiatan</th>
+                  <th>Tanggal</th>
+                  <th>Jenis</th>
+                  <th>Status</th>
+                  <th>PIC</th>
+                  <th>Peserta</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="act-tbl"></tbody>
+            </table>
           </div>
         </div>
 
-        <div class="sec-hdr">
-          <div class="sec-title">Kegiatan Terbaru</div>
-          <button class="btn btn-ghost" onclick="goTo('activities')">Lihat semua →</button>
-        </div>
-        <div class="tbl-wrap" style="margin-bottom:28px">
-          <table>
-            <thead>
-              <tr>
-                <th>Nama Kegiatan</th>
-                <th>Tanggal</th>
-                <th>Jenis</th>
-                <th>Status</th>
-                <th>PIC</th>
-              </tr>
-            </thead>
-            <tbody id="dash-tbl"></tbody>
-          </table>
-        </div>
-
-        <div class="sec-hdr"><div class="sec-title">Progres Per Jenis</div></div>
-        <div id="prog-bars"></div>
-      </div>
-
-      <!-- ACTIVITIES -->
-      <div class="view" id="view-activities">
-        <div class="filter-bar">
-          <div class="search-wrap">
-            <span class="search-ico">🔍</span>
-            <input type="text" class="search-input" placeholder="Cari kegiatan..." id="search-inp" oninput="renderActivities()">
+        <!-- CALENDAR -->
+        <div class="view" id="view-calendar">
+          <div class="cal-nav">
+            <button class="btn btn-ghost" onclick="changeMonth(-1)">← Prev</button>
+            <div class="cal-title" id="cal-title"></div>
+            <button class="btn btn-ghost" onclick="changeMonth(1)">Next →</button>
           </div>
-          <button class="filter-pill active" onclick="setFilter('all',this)">Semua</button>
-          <button class="filter-pill" onclick="setFilter('done',this)">Selesai</button>
-          <button class="filter-pill" onclick="setFilter('progress',this)">Berjalan</button>
-          <button class="filter-pill" onclick="setFilter('plan',this)">Direncanakan</button>
-          <button class="filter-pill" onclick="setFilter('cancel',this)">Dibatalkan</button>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Nama Kegiatan</th>
-                <th>Tanggal</th>
-                <th>Jenis</th>
-                <th>Status</th>
-                <th>PIC</th>
-                <th>Peserta</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="act-tbl"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- CALENDAR -->
-      <div class="view" id="view-calendar">
-        <div class="cal-nav">
-          <button class="btn btn-ghost" onclick="changeMonth(-1)">← Prev</button>
-          <div class="cal-title" id="cal-title"></div>
-          <button class="btn btn-ghost" onclick="changeMonth(1)">Next →</button>
-        </div>
-        <div class="cal-grid">
-          <div class="cal-hdr">
-            <div class="cal-day-name">Min</div><div class="cal-day-name">Sen</div>
-            <div class="cal-day-name">Sel</div><div class="cal-day-name">Rab</div>
-            <div class="cal-day-name">Kam</div><div class="cal-day-name">Jum</div>
-            <div class="cal-day-name">Sab</div>
+          <div class="cal-grid">
+            <div class="cal-hdr">
+              <div class="cal-day-name">Min</div>
+              <div class="cal-day-name">Sen</div>
+              <div class="cal-day-name">Sel</div>
+              <div class="cal-day-name">Rab</div>
+              <div class="cal-day-name">Kam</div>
+              <div class="cal-day-name">Jum</div>
+              <div class="cal-day-name">Sab</div>
+            </div>
+            <div class="cal-body" id="cal-body"></div>
           </div>
-          <div class="cal-body" id="cal-body"></div>
         </div>
-      </div>
 
-      <!-- ROADMAP -->
-      <div class="view" id="view-roadmap">
-        <div class="sec-hdr">
-          <div class="sec-title">Roadmap Program 2025</div>
-          <button class="btn btn-primary" onclick="openPlanModal()">＋ Tambah Rencana</button>
+        <!-- ROADMAP -->
+        <div class="view" id="view-roadmap">
+          <div class="sec-hdr">
+            <div class="sec-title">Roadmap Program 2025</div>
+            <button class="btn btn-primary" onclick="openPlanModal()">＋ Tambah Rencana</button>
+          </div>
+          <div class="quad-grid" id="plan-grid"></div>
+          <div class="sec-hdr">
+            <div class="sec-title">Pencapaian Target</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Program</th>
+                  <th>Target</th>
+                  <th>Terlaksana</th>
+                  <th>Progres</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="target-tbl"></tbody>
+            </table>
+          </div>
         </div>
-        <div class="quad-grid" id="plan-grid"></div>
-        <div class="sec-hdr"><div class="sec-title">Pencapaian Target</div></div>
-        <div class="tbl-wrap">
-          <table>
-            <thead>
-              <tr><th>Program</th><th>Target</th><th>Terlaksana</th><th>Progres</th><th>Status</th></tr>
-            </thead>
-            <tbody id="target-tbl"></tbody>
-          </table>
+
+        <!-- LOG -->
+        <div class="view" id="view-log">
+          <div class="sec-hdr">
+            <div class="sec-title">Log Kegiatan</div>
+          </div>
+          <div class="log-stack" id="log-stack"></div>
         </div>
+
       </div>
+    </main>
+  </div>
 
-      <!-- LOG -->
-      <div class="view" id="view-log">
-        <div class="sec-hdr"><div class="sec-title">Log Kegiatan</div></div>
-        <div class="log-stack" id="log-stack"></div>
-      </div>
-
-    </div>
-  </main>
-</div>
-
-<!-- MODAL KEGIATAN -->
-<div class="overlay" id="act-overlay" onclick="closeActModal(event)">
-  <div class="modal">
-    <div class="modal-title" id="act-modal-title">Tambah Kegiatan</div>
-    <div class="form-group">
-      <label class="form-label">Nama Kegiatan *</label>
-      <input type="text" id="f-name" placeholder="Contoh: Workshop Machine Learning">
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Tanggal *</label><input type="date" id="f-date"></div>
-      <div class="form-group"><label class="form-label">Jam</label><input type="time" id="f-time"></div>
-    </div>
-    <div class="form-row">
+  <!-- MODAL KEGIATAN -->
+  <div class="overlay" id="act-overlay" onclick="closeActModal(event)">
+    <div class="modal">
+      <div class="modal-title" id="act-modal-title">Tambah Kegiatan</div>
       <div class="form-group">
-        <label class="form-label">Jenis</label>
-        <select id="f-type">
-          <option value="FGD">FGD</option>
-          <option value="seminar">Seminar</option>
-          <option value="sharing">Sharing Session</option>
-          <option value="other">Lainnya</option>
-        </select>
+        <label class="form-label">Nama Kegiatan *</label>
+        <input type="text" id="f-name" placeholder="Contoh: Workshop Machine Learning">
       </div>
-      <div class="form-group">
-        <label class="form-label">Status</label>
-        <select id="f-status">
-          <option value="plan">Direncanakan</option>
-          <option value="progress">Sedang Berjalan</option>
-          <option value="done">Selesai</option>
-          <option value="cancel">Dibatalkan</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tanggal *</label><input type="date" id="f-date"></div>
+        <div class="form-group"><label class="form-label">Jam</label><input type="time" id="f-time"></div>
       </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Lokasi</label><input type="text" id="f-location" placeholder="Gedung / Online"></div>
-      <div class="form-group"><label class="form-label">Jumlah Peserta</label><input type="number" id="f-participants" placeholder="0" min="0"></div>
-    </div>
-    <div class="form-group"><label class="form-label">PIC</label><input type="text" id="f-pic" placeholder="Nama ambassador"></div>
-    <div class="form-group"><label class="form-label">Deskripsi</label><textarea id="f-desc" placeholder="Tujuan, catatan, atau hasil kegiatan..."></textarea></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeActModal()">Batal</button>
-      <button class="btn btn-primary" id="act-save-btn" onclick="saveActivity()">Simpan</button>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Jenis</label>
+          <select id="f-type">
+            <option value="FGD">FGD</option>
+            <option value="seminar">Seminar</option>
+            <option value="sharing">Sharing Session</option>
+            <option value="other">Lainnya</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="f-status">
+            <option value="plan">Direncanakan</option>
+            <option value="progress">Sedang Berjalan</option>
+            <option value="done">Selesai</option>
+            <option value="cancel">Dibatalkan</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Lokasi</label><input type="text" id="f-location"
+            placeholder="Gedung / Online"></div>
+        <div class="form-group"><label class="form-label">Jumlah Peserta</label><input type="number" id="f-participants"
+            placeholder="0" min="0"></div>
+      </div>
+      <div class="form-group"><label class="form-label">PIC</label><input type="text" id="f-pic"
+          placeholder="Nama ambassador"></div>
+      <div class="form-group"><label class="form-label">Deskripsi</label><textarea id="f-desc"
+          placeholder="Tujuan, catatan, atau hasil kegiatan..."></textarea></div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeActModal()">Batal</button>
+        <button class="btn btn-primary" id="act-save-btn" onclick="saveActivity()">Simpan</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- MODAL PLAN -->
-<div class="overlay" id="plan-overlay" onclick="closePlanModal(event)">
-  <div class="modal">
-    <div class="modal-title">Tambah Rencana</div>
-    <div class="form-group"><label class="form-label">Nama Program *</label><input type="text" id="p-name" placeholder="Contoh: Workshop AI for Beginners"></div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Kuartal</label>
-        <select id="p-quarter">
-          <option value="Q1">Q1</option><option value="Q2">Q2</option>
-          <option value="Q3">Q3</option><option value="Q4">Q4</option>
-        </select>
+  <!-- MODAL PLAN -->
+  <div class="overlay" id="plan-overlay" onclick="closePlanModal(event)">
+    <div class="modal">
+      <div class="modal-title">Tambah Rencana</div>
+      <div class="form-group"><label class="form-label">Nama Program *</label><input type="text" id="p-name"
+          placeholder="Contoh: Workshop AI for Beginners"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Kuartal</label>
+          <select id="p-quarter">
+            <option value="Q1">Q1</option>
+            <option value="Q2">Q2</option>
+            <option value="Q3">Q3</option>
+            <option value="Q4">Q4</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Target Bulan</label><input type="month" id="p-month"></div>
       </div>
-      <div class="form-group"><label class="form-label">Target Bulan</label><input type="month" id="p-month"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Deskripsi</label><textarea id="p-desc" placeholder="Tujuan program..."></textarea></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closePlanModal()">Batal</button>
-      <button class="btn btn-primary" id="plan-save-btn" onclick="savePlan()">Simpan</button>
+      <div class="form-group"><label class="form-label">Deskripsi</label><textarea id="p-desc"
+          placeholder="Tujuan program..."></textarea></div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closePlanModal()">Batal</button>
+        <button class="btn btn-primary" id="plan-save-btn" onclick="savePlan()">Simpan</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
-<script>
-const SUPABASE_URL = 'https://vjzuavwxasvpxsruqlnz.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_9vuet4x3OMq1JAto8TdMug_JutSrv5b';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+  <script>
+    const SUPABASE_URL = 'https://vjzuavwxasvpxsruqlnz.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_9vuet4x3OMq1JAto8TdMug_JutSrv5b';
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let activities = [], plans = [], currentFilter = 'all', calDate = new Date(), editingId = null;
-const MN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-const MN_FULL = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-const SL = { done:'Selesai', progress:'Berjalan', plan:'Direncanakan', cancel:'Dibatalkan' };
-const TL = { FGD:'FGD', seminar:'Seminar', sharing:'Sharing', other:'Lainnya' };
-const TC = { FGD:'#8b5cf6', seminar:'#0ea5e9', sharing:'#10b981', other:'#94a3b8' };
+    let activities = [], plans = [], currentFilter = 'all', calDate = new Date(), editingId = null;
+    const MN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const MN_FULL = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const SL = { done: 'Selesai', progress: 'Berjalan', plan: 'Direncanakan', cancel: 'Dibatalkan' };
+    const TL = { FGD: 'FGD', seminar: 'Seminar', sharing: 'Sharing', other: 'Lainnya' };
+    const TC = { FGD: '#8b5cf6', seminar: '#0ea5e9', sharing: '#10b981', other: '#94a3b8' };
 
-function chipS(s) {
-  const m = {done:'c-done',progress:'c-progress',plan:'c-plan',cancel:'c-cancel'};
-  return `<span class="chip ${m[s]||''}">${SL[s]||s}</span>`;
-}
-function chipT(t) { return `<span class="chip c-${t}">${TL[t]||t}</span>`; }
-function fmtD(d) {
-  if(!d) return '-';
-  const p = d.split('-');
-  return `${parseInt(p[2])} ${MN[parseInt(p[1])-1]} ${p[0]}`;
-}
+    function chipS(s) {
+      const m = { done: 'c-done', progress: 'c-progress', plan: 'c-plan', cancel: 'c-cancel' };
+      return `<span class="chip ${m[s] || ''}">${SL[s] || s}</span>`;
+    }
+    function chipT(t) { return `<span class="chip c-${t}">${TL[t] || t}</span>`; }
+    function fmtD(d) {
+      if (!d) return '-';
+      const p = d.split('-');
+      return `${parseInt(p[2])} ${MN[parseInt(p[1]) - 1]} ${p[0]}`;
+    }
 
-let toastTmr;
-function toast(msg, type='info') {
-  clearTimeout(toastTmr);
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.className = `toast show ${type}`;
-  toastTmr = setTimeout(()=>el.classList.remove('show'), 3200);
-}
+    let toastTmr;
+    function toast(msg, type = 'info') {
+      clearTimeout(toastTmr);
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.className = `toast show ${type}`;
+      toastTmr = setTimeout(() => el.classList.remove('show'), 3200);
+    }
 
-function setDB(on) {
-  document.getElementById('db-dot').className = 'db-dot'+(on?' on':'');
-  document.getElementById('db-lbl').textContent = on ? 'Terhubung' : 'Offline';
-}
+    function setDB(on) {
+      document.getElementById('db-dot').className = 'db-dot' + (on ? ' on' : '');
+      document.getElementById('db-lbl').textContent = on ? 'Terhubung' : 'Offline';
+    }
 
-function hideLoading() {
-  const el = document.getElementById('loading-screen');
-  el.style.opacity = '0';
-  setTimeout(()=>el.style.display='none', 400);
-}
+    function hideLoading() {
+      const el = document.getElementById('loading-screen');
+      el.style.opacity = '0';
+      setTimeout(() => el.style.display = 'none', 400);
+    }
 
-// ── AUTH ──
-function switchAuth(mode) {
-  document.getElementById('form-login').style.display = mode==='login' ? 'flex' : 'none';
-  document.getElementById('form-register').style.display = mode==='register' ? 'flex' : 'none';
-  document.getElementById('tab-login').className = 'auth-tab'+(mode==='login'?' active':'');
-  document.getElementById('tab-reg').className = 'auth-tab'+(mode==='register'?' active':'');
-  document.getElementById('login-err').classList.remove('show');
-  document.getElementById('reg-err').classList.remove('show');
-}
+    // ── AUTH ──
+    function switchAuth(mode) {
+      document.getElementById('form-login').style.display = mode === 'login' ? 'flex' : 'none';
+      document.getElementById('form-register').style.display = mode === 'register' ? 'flex' : 'none';
+      document.getElementById('tab-login').className = 'auth-tab' + (mode === 'login' ? ' active' : '');
+      document.getElementById('tab-reg').className = 'auth-tab' + (mode === 'register' ? ' active' : '');
+      document.getElementById('login-err').classList.remove('show');
+      document.getElementById('reg-err').classList.remove('show');
+    }
 
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const err = document.getElementById('login-err');
-  const btn = document.getElementById('login-btn');
-  if(!email||!pass) { err.textContent='Email dan password wajib diisi.'; err.classList.add('show'); return; }
-  btn.disabled=true; btn.textContent='Masuk...';
-  const { error } = await db.auth.signInWithPassword({ email, password: pass });
-  btn.disabled=false; btn.textContent='Masuk ke Akun';
-  if(error) { err.textContent=error.message; err.classList.add('show'); }
-}
+    async function doLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-pass').value;
+      const err = document.getElementById('login-err');
+      const btn = document.getElementById('login-btn');
+      if (!email || !pass) { err.textContent = 'Email dan password wajib diisi.'; err.classList.add('show'); return; }
+      btn.disabled = true; btn.textContent = 'Masuk...';
+      const { error } = await db.auth.signInWithPassword({ email, password: pass });
+      btn.disabled = false; btn.textContent = 'Masuk ke Akun';
+      if (error) { err.textContent = error.message; err.classList.add('show'); }
+    }
 
-async function doRegister() {
-  const name = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const pass = document.getElementById('reg-pass').value;
-  const pass2 = document.getElementById('reg-pass2').value;
-  const err = document.getElementById('reg-err');
-  const btn = document.getElementById('reg-btn');
-  err.classList.remove('show');
-  if(!name||!email||!pass) { err.textContent='Semua kolom wajib diisi.'; err.classList.add('show'); return; }
-  if(pass.length < 6) { err.textContent='Password minimal 6 karakter.'; err.classList.add('show'); return; }
-  if(pass !== pass2) { err.textContent='Konfirmasi password tidak cocok.'; err.classList.add('show'); return; }
-  btn.disabled=true; btn.textContent='Mendaftar...';
-  const { error } = await db.auth.signUp({ email, password:pass, options:{ data:{ full_name:name } } });
-  btn.disabled=false; btn.textContent='Buat Akun';
-  if(error) { err.textContent=error.message; err.classList.add('show'); }
-  else { err.style.background='rgba(16,185,129,.15)'; err.style.borderColor='rgba(16,185,129,.3)'; err.style.color='#a7f3d0'; err.textContent='Akun berhasil dibuat! Cek email untuk verifikasi.'; err.classList.add('show'); }
-}
+    async function doRegister() {
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      const pass2 = document.getElementById('reg-pass2').value;
+      const err = document.getElementById('reg-err');
+      const btn = document.getElementById('reg-btn');
+      err.classList.remove('show');
+      if (!name || !email || !pass) { err.textContent = 'Semua kolom wajib diisi.'; err.classList.add('show'); return; }
+      if (pass.length < 6) { err.textContent = 'Password minimal 6 karakter.'; err.classList.add('show'); return; }
+      if (pass !== pass2) { err.textContent = 'Konfirmasi password tidak cocok.'; err.classList.add('show'); return; }
+      btn.disabled = true; btn.textContent = 'Mendaftar...';
+      const { error } = await db.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+      btn.disabled = false; btn.textContent = 'Buat Akun';
+      if (error) { err.textContent = error.message; err.classList.add('show'); }
+      else { err.style.background = 'rgba(16,185,129,.15)'; err.style.borderColor = 'rgba(16,185,129,.3)'; err.style.color = '#a7f3d0'; err.textContent = 'Akun berhasil dibuat! Cek email untuk verifikasi.'; err.classList.add('show'); }
+    }
 
-async function doLogout() {
-  await db.auth.signOut();
-}
+    async function doLogout() {
+      await db.auth.signOut();
+    }
 
-function showApp(user) {
-  document.getElementById('auth-screen').classList.remove('show');
-  document.getElementById('app').classList.add('show');
-  const meta = user.user_metadata || {};
-  const name = meta.full_name || meta.name || user.email.split('@')[0];
-  document.getElementById('user-name').textContent = name;
-  document.getElementById('user-email').textContent = user.email;
-  document.getElementById('user-av').textContent = name.charAt(0).toUpperCase();
-}
+    function showApp(user) {
+      document.getElementById('auth-screen').classList.remove('show');
+      document.getElementById('app').classList.add('show');
+      const meta = user.user_metadata || {};
+      const name = meta.full_name || meta.name || user.email.split('@')[0];
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-email').textContent = user.email;
+      document.getElementById('user-av').textContent = name.charAt(0).toUpperCase();
+    }
 
-function showAuth() {
-  document.getElementById('app').classList.remove('show');
-  document.getElementById('auth-screen').classList.add('show');
-}
+    function showAuth() {
+      document.getElementById('app').classList.remove('show');
+      document.getElementById('auth-screen').classList.add('show');
+    }
 
-// ── SIDEBAR ──
-function openSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const backdrop = document.getElementById('backdrop');
-  
-  sidebar.classList.add('open');
-  backdrop.classList.add('show');
-  
-  // Mencegah body scroll saat menu buka di mobile
-  document.body.style.overflow = 'hidden';
-}
+    // ── SIDEBAR ──
+    function openSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
 
-function closeSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const backdrop = document.getElementById('backdrop');
-  
-  sidebar.classList.remove('open');
-  backdrop.classList.remove('show');
-  
-  // Mengembalikan scroll body
-  document.body.style.overflow = 'auto';
-}
+      if (sidebar && overlay) {
+        sidebar.classList.add('open');
+        overlay.classList.add('show'); // Menyalakan blur
+        document.body.style.overflow = 'hidden';
+      }
+    }
 
-// Pastikan inisialisasi klik di mobile berjalan
-document.addEventListener('DOMContentLoaded', () => {
-  const btnHam = document.getElementById('hamburger');
-  if(btnHam) {
-    btnHam.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openSidebar();
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      if (sidebar && overlay) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show'); // Mematikan blur
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    // Inisialisasi saat halaman siap
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamBtn = document.getElementById('hamburger');
+      if (hamBtn) {
+        // Menghapus atribut onclick lama jika ada dan menggantinya dengan listener
+        hamBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          openSidebar();
+        });
+      }
     });
-  }
-});
 
-// ── NAV ──
-const pageTitles = { dashboard:'Dashboard', activities:'Semua Kegiatan', calendar:'Kalender', roadmap:'Roadmap & Plan', log:'Log Kegiatan' };
-function goTo(v) {
-  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
-  document.getElementById('view-'+v).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(el=>{
-    if(el.getAttribute('onclick').includes("'"+v+"'")) el.classList.add('active');
-  });
-  document.getElementById('page-title').textContent = pageTitles[v]||v;
-  closeSidebar();
-  if(v==='dashboard') renderDash();
-  if(v==='activities') renderActivities();
-  if(v==='calendar') renderCalendar();
-  if(v==='roadmap') renderRoadmap();
-  if(v==='log') renderLog();
-}
 
-// ── DATA ──
-async function fetchAll() {
-  const [r1, r2] = await Promise.all([
-    db.from('activities').select('*').order('date',{ascending:false}),
-    db.from('plans').select('*').order('month',{ascending:true})
-  ]);
-  if(r1.error||r2.error) { setDB(false); return false; }
-  activities = r1.data||[];
-  plans = r2.data||[];
-  setDB(true); return true;
-}
 
-function subscribeRT() {
-  db.channel('rt-all')
-    .on('postgres_changes',{event:'*',schema:'public',table:'activities'},async()=>{
-      const r = await db.from('activities').select('*').order('date',{ascending:false});
-      activities = r.data||[];
+    // ── NAV ──
+    const pageTitles = { dashboard: 'Dashboard', activities: 'Semua Kegiatan', calendar: 'Kalender', roadmap: 'Roadmap & Plan', log: 'Log Kegiatan' };
+    function goTo(v) {
+      document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + v).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(el => {
+        if (el.getAttribute('onclick').includes("'" + v + "'")) el.classList.add('active');
+      });
+      document.getElementById('page-title').textContent = pageTitles[v] || v;
+      closeSidebar();
+      if (v === 'dashboard') renderDash();
+      if (v === 'activities') renderActivities();
+      if (v === 'calendar') renderCalendar();
+      if (v === 'roadmap') renderRoadmap();
+      if (v === 'log') renderLog();
+    }
+
+    // ── DATA ──
+    async function fetchAll() {
+      const [r1, r2] = await Promise.all([
+        db.from('activities').select('*').order('date', { ascending: false }),
+        db.from('plans').select('*').order('month', { ascending: true })
+      ]);
+      if (r1.error || r2.error) { setDB(false); return false; }
+      activities = r1.data || [];
+      plans = r2.data || [];
+      setDB(true); return true;
+    }
+
+    function subscribeRT() {
+      db.channel('rt-all')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'activities' }, async () => {
+          const r = await db.from('activities').select('*').order('date', { ascending: false });
+          activities = r.data || [];
+          renderDash(); renderActivities(); renderCalendar(); renderLog();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'plans' }, async () => {
+          const r = await db.from('plans').select('*').order('month', { ascending: true });
+          plans = r.data || [];
+          renderRoadmap();
+        })
+        .subscribe();
+    }
+
+    // ── ACTIVITY MODAL ──
+    function openActivityModal(id) {
+      editingId = id || null;
+      const fields = ['f-name', 'f-date', 'f-time', 'f-location', 'f-participants', 'f-pic', 'f-desc'];
+      if (id) {
+        const a = activities.find(x => x.id === id);
+        document.getElementById('act-modal-title').textContent = 'Edit Kegiatan';
+        document.getElementById('f-name').value = a.name;
+        document.getElementById('f-date').value = a.date;
+        document.getElementById('f-time').value = a.time || '';
+        document.getElementById('f-type').value = a.type;
+        document.getElementById('f-status').value = a.status;
+        document.getElementById('f-location').value = a.location || '';
+        document.getElementById('f-participants').value = a.participants || '';
+        document.getElementById('f-pic').value = a.pic || '';
+        document.getElementById('f-desc').value = a.desc || '';
+      } else {
+        document.getElementById('act-modal-title').textContent = 'Tambah Kegiatan';
+        fields.forEach(id => document.getElementById(id).value = '');
+        document.getElementById('f-type').value = 'FGD';
+        document.getElementById('f-status').value = 'plan';
+      }
+      document.getElementById('act-overlay').classList.add('open');
+    }
+    function closeActModal(e) {
+      if (!e || e.target === document.getElementById('act-overlay'))
+        document.getElementById('act-overlay').classList.remove('open');
+    }
+    async function saveActivity() {
+      const name = document.getElementById('f-name').value.trim();
+      const date = document.getElementById('f-date').value;
+      if (!name || !date) { toast('Nama dan tanggal wajib diisi!', 'err'); return; }
+      const btn = document.getElementById('act-save-btn');
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+      const payload = {
+        name, date,
+        time: document.getElementById('f-time').value || null,
+        type: document.getElementById('f-type').value,
+        status: document.getElementById('f-status').value,
+        location: document.getElementById('f-location').value || null,
+        participants: parseInt(document.getElementById('f-participants').value) || 0,
+        pic: document.getElementById('f-pic').value || null,
+        desc: document.getElementById('f-desc').value || null,
+      };
+      let error;
+      if (editingId) ({ error } = await db.from('activities').update(payload).eq('id', editingId));
+      else ({ error } = await db.from('activities').insert(payload));
+      btn.disabled = false; btn.textContent = 'Simpan';
+      if (error) { toast('Gagal: ' + error.message, 'err'); return; }
+      toast(editingId ? 'Kegiatan diperbarui!' : 'Kegiatan ditambahkan!', 'ok');
+      closeActModal();
+      const r = await db.from('activities').select('*').order('date', { ascending: false });
+      activities = r.data || [];
       renderDash(); renderActivities(); renderCalendar(); renderLog();
-    })
-    .on('postgres_changes',{event:'*',schema:'public',table:'plans'},async()=>{
-      const r = await db.from('plans').select('*').order('month',{ascending:true});
-      plans = r.data||[];
-      renderRoadmap();
-    })
-    .subscribe();
-}
+    }
+    async function deleteActivity(id) {
+      if (!confirm('Yakin hapus kegiatan ini?')) return;
+      const { error } = await db.from('activities').delete().eq('id', id);
+      if (error) { toast('Gagal hapus', 'err'); return; }
+      toast('Kegiatan dihapus', 'ok');
+      const r = await db.from('activities').select('*').order('date', { ascending: false });
+      activities = r.data || [];
+      renderDash(); renderActivities(); renderCalendar(); renderLog();
+    }
 
-// ── ACTIVITY MODAL ──
-function openActivityModal(id) {
-  editingId = id||null;
-  const fields = ['f-name','f-date','f-time','f-location','f-participants','f-pic','f-desc'];
-  if(id) {
-    const a = activities.find(x=>x.id===id);
-    document.getElementById('act-modal-title').textContent = 'Edit Kegiatan';
-    document.getElementById('f-name').value = a.name;
-    document.getElementById('f-date').value = a.date;
-    document.getElementById('f-time').value = a.time||'';
-    document.getElementById('f-type').value = a.type;
-    document.getElementById('f-status').value = a.status;
-    document.getElementById('f-location').value = a.location||'';
-    document.getElementById('f-participants').value = a.participants||'';
-    document.getElementById('f-pic').value = a.pic||'';
-    document.getElementById('f-desc').value = a.desc||'';
-  } else {
-    document.getElementById('act-modal-title').textContent = 'Tambah Kegiatan';
-    fields.forEach(id=>document.getElementById(id).value='');
-    document.getElementById('f-type').value = 'FGD';
-    document.getElementById('f-status').value = 'plan';
-  }
-  document.getElementById('act-overlay').classList.add('open');
-}
-function closeActModal(e) {
-  if(!e||e.target===document.getElementById('act-overlay'))
-    document.getElementById('act-overlay').classList.remove('open');
-}
-async function saveActivity() {
-  const name = document.getElementById('f-name').value.trim();
-  const date = document.getElementById('f-date').value;
-  if(!name||!date) { toast('Nama dan tanggal wajib diisi!','err'); return; }
-  const btn = document.getElementById('act-save-btn');
-  btn.disabled=true; btn.textContent='Menyimpan...';
-  const payload = {
-    name, date,
-    time: document.getElementById('f-time').value||null,
-    type: document.getElementById('f-type').value,
-    status: document.getElementById('f-status').value,
-    location: document.getElementById('f-location').value||null,
-    participants: parseInt(document.getElementById('f-participants').value)||0,
-    pic: document.getElementById('f-pic').value||null,
-    desc: document.getElementById('f-desc').value||null,
-  };
-  let error;
-  if(editingId) ({ error } = await db.from('activities').update(payload).eq('id',editingId));
-  else ({ error } = await db.from('activities').insert(payload));
-  btn.disabled=false; btn.textContent='Simpan';
-  if(error) { toast('Gagal: '+error.message,'err'); return; }
-  toast(editingId?'Kegiatan diperbarui!':'Kegiatan ditambahkan!','ok');
-  closeActModal();
-  const r = await db.from('activities').select('*').order('date',{ascending:false});
-  activities = r.data||[];
-  renderDash(); renderActivities(); renderCalendar(); renderLog();
-}
-async function deleteActivity(id) {
-  if(!confirm('Yakin hapus kegiatan ini?')) return;
-  const { error } = await db.from('activities').delete().eq('id',id);
-  if(error) { toast('Gagal hapus','err'); return; }
-  toast('Kegiatan dihapus','ok');
-  const r = await db.from('activities').select('*').order('date',{ascending:false});
-  activities = r.data||[];
-  renderDash(); renderActivities(); renderCalendar(); renderLog();
-}
+    // ── PLAN MODAL ──
+    function openPlanModal() { document.getElementById('plan-overlay').classList.add('open'); }
+    function closePlanModal(e) {
+      if (!e || e.target === document.getElementById('plan-overlay')) {
+        document.getElementById('plan-overlay').classList.remove('open');
+        ['p-name', 'p-month', 'p-desc'].forEach(id => document.getElementById(id).value = '');
+      }
+    }
+    async function savePlan() {
+      const name = document.getElementById('p-name').value.trim();
+      if (!name) { toast('Nama program wajib!', 'err'); return; }
+      const btn = document.getElementById('plan-save-btn');
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+      const { error } = await db.from('plans').insert({
+        name, quarter: document.getElementById('p-quarter').value,
+        month: document.getElementById('p-month').value || null,
+        desc: document.getElementById('p-desc').value || null,
+      });
+      btn.disabled = false; btn.textContent = 'Simpan';
+      if (error) { toast('Gagal: ' + error.message, 'err'); return; }
+      toast('Rencana ditambahkan!', 'ok');
+      closePlanModal();
+      const r = await db.from('plans').select('*').order('month', { ascending: true });
+      plans = r.data || []; renderRoadmap();
+    }
+    async function deletePlan(id) {
+      if (!confirm('Hapus rencana ini?')) return;
+      await db.from('plans').delete().eq('id', id);
+      const r = await db.from('plans').select('*').order('month', { ascending: true });
+      plans = r.data || []; renderRoadmap();
+      toast('Rencana dihapus', 'ok');
+    }
 
-// ── PLAN MODAL ──
-function openPlanModal() { document.getElementById('plan-overlay').classList.add('open'); }
-function closePlanModal(e) {
-  if(!e||e.target===document.getElementById('plan-overlay')) {
-    document.getElementById('plan-overlay').classList.remove('open');
-    ['p-name','p-month','p-desc'].forEach(id=>document.getElementById(id).value='');
-  }
-}
-async function savePlan() {
-  const name = document.getElementById('p-name').value.trim();
-  if(!name) { toast('Nama program wajib!','err'); return; }
-  const btn = document.getElementById('plan-save-btn');
-  btn.disabled=true; btn.textContent='Menyimpan...';
-  const { error } = await db.from('plans').insert({
-    name, quarter:document.getElementById('p-quarter').value,
-    month:document.getElementById('p-month').value||null,
-    desc:document.getElementById('p-desc').value||null,
-  });
-  btn.disabled=false; btn.textContent='Simpan';
-  if(error) { toast('Gagal: '+error.message,'err'); return; }
-  toast('Rencana ditambahkan!','ok');
-  closePlanModal();
-  const r = await db.from('plans').select('*').order('month',{ascending:true});
-  plans = r.data||[]; renderRoadmap();
-}
-async function deletePlan(id) {
-  if(!confirm('Hapus rencana ini?')) return;
-  await db.from('plans').delete().eq('id',id);
-  const r = await db.from('plans').select('*').order('month',{ascending:true});
-  plans = r.data||[]; renderRoadmap();
-  toast('Rencana dihapus','ok');
-}
+    // ── RENDER DASHBOARD ──
+    function renderDash() {
+      document.getElementById('st-total').textContent = activities.length;
+      document.getElementById('st-done').textContent = activities.filter(a => a.status === 'done').length;
+      document.getElementById('st-prog').textContent = activities.filter(a => a.status === 'progress').length;
+      document.getElementById('st-plan').textContent = activities.filter(a => a.status === 'plan').length;
 
-// ── RENDER DASHBOARD ──
-function renderDash() {
-  document.getElementById('st-total').textContent = activities.length;
-  document.getElementById('st-done').textContent = activities.filter(a=>a.status==='done').length;
-  document.getElementById('st-prog').textContent = activities.filter(a=>a.status==='progress').length;
-  document.getElementById('st-plan').textContent = activities.filter(a=>a.status==='plan').length;
-
-  const recent = [...activities].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
-  document.getElementById('dash-tbl').innerHTML = recent.length
-    ? recent.map(a=>`<tr>
+      const recent = [...activities].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+      document.getElementById('dash-tbl').innerHTML = recent.length
+        ? recent.map(a => `<tr>
         <td><strong>${a.name}</strong></td>
         <td>${fmtD(a.date)}</td>
         <td>${chipT(a.type)}</td>
         <td>${chipS(a.status)}</td>
-        <td>${a.pic||'—'}</td>
+        <td>${a.pic || '—'}</td>
       </tr>`).join('')
-    : `<tr><td colspan="5"><div class="empty"><div class="empty-ico">📂</div><div class="empty-msg">Belum ada kegiatan</div><div class="empty-sub">Tambah kegiatan pertamamu</div></div></td></tr>`;
+        : `<tr><td colspan="5"><div class="empty"><div class="empty-ico">📂</div><div class="empty-msg">Belum ada kegiatan</div><div class="empty-sub">Tambah kegiatan pertamamu</div></div></td></tr>`;
 
-  const types = ['FGD','seminar','sharing','other'];
-  const counts = types.map(t=>activities.filter(a=>a.type===t).length);
-  const max = Math.max(...counts, 1);
-  document.getElementById('prog-bars').innerHTML = types.map((t,i)=>{
-    const pct = Math.round(counts[i]/max*100);
-    return `<div class="prog-item">
+      const types = ['FGD', 'seminar', 'sharing', 'other'];
+      const counts = types.map(t => activities.filter(a => a.type === t).length);
+      const max = Math.max(...counts, 1);
+      document.getElementById('prog-bars').innerHTML = types.map((t, i) => {
+        const pct = Math.round(counts[i] / max * 100);
+        return `<div class="prog-item">
       <div class="prog-label"><span>${TL[t]}</span><span>${counts[i]} kegiatan</span></div>
       <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${TC[t]}"></div></div>
     </div>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-// ── RENDER ACTIVITIES ──
-function renderActivities() {
-  const q = (document.getElementById('search-inp').value||'').toLowerCase();
-  const list = activities.filter(a=>{
-    const mF = currentFilter==='all'||a.status===currentFilter;
-    const mS = !q||a.name.toLowerCase().includes(q)||(a.pic||'').toLowerCase().includes(q);
-    return mF && mS;
-  }).sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('act-tbl').innerHTML = list.length
-    ? list.map(a=>`<tr>
-        <td><strong>${a.name}</strong>${a.location?`<br><small style="color:var(--text3)">${a.location}</small>`:''}</td>
+    // ── RENDER ACTIVITIES ──
+    function renderActivities() {
+      const q = (document.getElementById('search-inp').value || '').toLowerCase();
+      const list = activities.filter(a => {
+        const mF = currentFilter === 'all' || a.status === currentFilter;
+        const mS = !q || a.name.toLowerCase().includes(q) || (a.pic || '').toLowerCase().includes(q);
+        return mF && mS;
+      }).sort((a, b) => b.date.localeCompare(a.date));
+      document.getElementById('act-tbl').innerHTML = list.length
+        ? list.map(a => `<tr>
+        <td><strong>${a.name}</strong>${a.location ? `<br><small style="color:var(--text3)">${a.location}</small>` : ''}</td>
         <td style="white-space:nowrap">${fmtD(a.date)}</td>
         <td>${chipT(a.type)}</td>
         <td>${chipS(a.status)}</td>
-        <td>${a.pic||'—'}</td>
-        <td>${a.participants||0} orang</td>
+        <td>${a.pic || '—'}</td>
+        <td>${a.participants || 0} orang</td>
         <td><div class="act-btns">
           <button class="ico-btn" title="Edit" onclick="openActivityModal(${a.id})">✏️</button>
           <button class="ico-btn" title="Hapus" onclick="deleteActivity(${a.id})">🗑️</button>
         </div></td>
       </tr>`).join('')
-    : `<tr><td colspan="7"><div class="empty"><div class="empty-ico">🔍</div><div class="empty-msg">Tidak ada hasil</div></div></td></tr>`;
-}
+        : `<tr><td colspan="7"><div class="empty"><div class="empty-ico">🔍</div><div class="empty-msg">Tidak ada hasil</div></div></td></tr>`;
+    }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-pill').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');
-  renderActivities();
-}
+    function setFilter(f, btn) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-pill').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderActivities();
+    }
 
-// ── RENDER CALENDAR ──
-function renderCalendar() {
-  const y = calDate.getFullYear(), m = calDate.getMonth();
-  document.getElementById('cal-title').textContent = MN_FULL[m]+' '+y;
-  const first = new Date(y,m,1).getDay();
-  const days = new Date(y,m+1,0).getDate();
-  const today = new Date();
-  let html = '';
-  for(let i=0;i<first;i++) {
-    const d = new Date(y,m,-first+i+1);
-    html += `<div class="cal-cell"><div class="cal-date-num other">${d.getDate()}</div></div>`;
-  }
-  for(let d=1;d<=days;d++) {
-    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isT = today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===d;
-    const evts = activities.filter(a=>a.date===ds);
-    html += `<div class="cal-cell${evts.length?' has-evt':''}">
-      <div class="cal-date-num${isT?' today':''}">${d}</div>
-      ${evts.map(a=>`<div class="cal-evt ${a.status}" title="${a.name}" onclick="openActivityModal(${a.id})">${a.name}</div>`).join('')}
+    // ── RENDER CALENDAR ──
+    function renderCalendar() {
+      const y = calDate.getFullYear(), m = calDate.getMonth();
+      document.getElementById('cal-title').textContent = MN_FULL[m] + ' ' + y;
+      const first = new Date(y, m, 1).getDay();
+      const days = new Date(y, m + 1, 0).getDate();
+      const today = new Date();
+      let html = '';
+      for (let i = 0; i < first; i++) {
+        const d = new Date(y, m, -first + i + 1);
+        html += `<div class="cal-cell"><div class="cal-date-num other">${d.getDate()}</div></div>`;
+      }
+      for (let d = 1; d <= days; d++) {
+        const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isT = today.getFullYear() === y && today.getMonth() === m && today.getDate() === d;
+        const evts = activities.filter(a => a.date === ds);
+        html += `<div class="cal-cell${evts.length ? ' has-evt' : ''}">
+      <div class="cal-date-num${isT ? ' today' : ''}">${d}</div>
+      ${evts.map(a => `<div class="cal-evt ${a.status}" title="${a.name}" onclick="openActivityModal(${a.id})">${a.name}</div>`).join('')}
     </div>`;
-  }
-  const rem = (7-(first+days)%7)%7;
-  for(let i=1;i<=rem;i++) html += `<div class="cal-cell"><div class="cal-date-num other">${i}</div></div>`;
-  document.getElementById('cal-body').innerHTML = html;
-}
-function changeMonth(d) { calDate.setMonth(calDate.getMonth()+d); renderCalendar(); }
+      }
+      const rem = (7 - (first + days) % 7) % 7;
+      for (let i = 1; i <= rem; i++) html += `<div class="cal-cell"><div class="cal-date-num other">${i}</div></div>`;
+      document.getElementById('cal-body').innerHTML = html;
+    }
+    function changeMonth(d) { calDate.setMonth(calDate.getMonth() + d); renderCalendar(); }
 
-// ── RENDER ROADMAP ──
-function renderRoadmap() {
-  const QS = ['Q1','Q2','Q3','Q4'];
-  const QL = { Q1:'Q1 — Jan s/d Mar', Q2:'Q2 — Apr s/d Jun', Q3:'Q3 — Jul s/d Sep', Q4:'Q4 — Okt s/d Des' };
-  const QC = { Q1:'#2563eb', Q2:'#10b981', Q3:'#ef4444', Q4:'#8b5cf6' };
-  document.getElementById('plan-grid').innerHTML = QS.map(q=>{
-    const qp = plans.filter(p=>p.quarter===q);
-    return `<div class="quad-card">
+    // ── RENDER ROADMAP ──
+    function renderRoadmap() {
+      const QS = ['Q1', 'Q2', 'Q3', 'Q4'];
+      const QL = { Q1: 'Q1 — Jan s/d Mar', Q2: 'Q2 — Apr s/d Jun', Q3: 'Q3 — Jul s/d Sep', Q4: 'Q4 — Okt s/d Des' };
+      const QC = { Q1: '#2563eb', Q2: '#10b981', Q3: '#ef4444', Q4: '#8b5cf6' };
+      document.getElementById('plan-grid').innerHTML = QS.map(q => {
+        const qp = plans.filter(p => p.quarter === q);
+        return `<div class="quad-card">
       <div class="quad-hdr ${q.toLowerCase()}">${QL[q]}<span class="quad-count">${qp.length}</span></div>
       <div class="quad-body">
-        ${qp.length ? qp.map(p=>`<div class="plan-item">
+        ${qp.length ? qp.map(p => `<div class="plan-item">
           <div class="plan-bullet" style="background:${QC[q]}"></div>
           <div class="plan-info">
             <div class="plan-name">${p.name}</div>
-            <div class="plan-date">${p.month?fmtD(p.month+'-01').split(' ').slice(1).join(' '):'Belum ditetapkan'}</div>
-            ${p.desc?`<div style="font-size:12px;color:var(--text3);margin-top:2px">${p.desc}</div>`:''}
+            <div class="plan-date">${p.month ? fmtD(p.month + '-01').split(' ').slice(1).join(' ') : 'Belum ditetapkan'}</div>
+            ${p.desc ? `<div style="font-size:12px;color:var(--text3);margin-top:2px">${p.desc}</div>` : ''}
           </div>
           <button class="plan-del" onclick="deletePlan(${p.id})">✕</button>
         </div>`).join('') : '<div style="font-size:13px;color:var(--text3);padding:8px 0">Belum ada rencana</div>'}
       </div>
     </div>`;
-  }).join('');
+      }).join('');
 
-  const targets = { FGD:4, seminar:3, sharing:5, other:10 };
-  document.getElementById('target-tbl').innerHTML = Object.keys(targets).map(t=>{
-    const done = activities.filter(a=>a.type===t&&a.status==='done').length;
-    const tgt = targets[t];
-    const pct = Math.min(Math.round(done/tgt*100),100);
-    const badge = pct>=100?'<span class="chip c-done">Tercapai</span>':pct>=50?'<span class="chip c-progress">On Track</span>':'<span class="chip c-plan">Di Bawah Target</span>';
-    return `<tr>
+      const targets = { FGD: 4, seminar: 3, sharing: 5, other: 10 };
+      document.getElementById('target-tbl').innerHTML = Object.keys(targets).map(t => {
+        const done = activities.filter(a => a.type === t && a.status === 'done').length;
+        const tgt = targets[t];
+        const pct = Math.min(Math.round(done / tgt * 100), 100);
+        const badge = pct >= 100 ? '<span class="chip c-done">Tercapai</span>' : pct >= 50 ? '<span class="chip c-progress">On Track</span>' : '<span class="chip c-plan">Di Bawah Target</span>';
+        return `<tr>
       <td>${chipT(t)}</td><td>${tgt}x</td><td>${done}x</td>
       <td><div class="prog-bar" style="width:140px;height:6px"><div class="prog-fill" style="width:${pct}%;background:${TC[t]}"></div></div></td>
       <td>${badge}</td>
     </tr>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-// ── RENDER LOG ──
-function renderLog() {
-  const sorted = [...activities].sort((a,b)=>b.date.localeCompare(a.date));
-  if(!sorted.length) {
-    document.getElementById('log-stack').innerHTML = `<div class="empty"><div class="empty-ico">📝</div><div class="empty-msg">Belum ada log</div></div>`;
-    return;
-  }
-  document.getElementById('log-stack').innerHTML = sorted.map(a=>{
-    const [y,m,d] = a.date.split('-');
-    return `<div class="log-card">
-      <div class="log-date-pill"><div class="log-day">${parseInt(d)}</div><div class="log-mon">${MN[parseInt(m)-1]} ${y}</div></div>
+    // ── RENDER LOG ──
+    function renderLog() {
+      const sorted = [...activities].sort((a, b) => b.date.localeCompare(a.date));
+      if (!sorted.length) {
+        document.getElementById('log-stack').innerHTML = `<div class="empty"><div class="empty-ico">📝</div><div class="empty-msg">Belum ada log</div></div>`;
+        return;
+      }
+      document.getElementById('log-stack').innerHTML = sorted.map(a => {
+        const [y, m, d] = a.date.split('-');
+        return `<div class="log-card">
+      <div class="log-date-pill"><div class="log-day">${parseInt(d)}</div><div class="log-mon">${MN[parseInt(m) - 1]} ${y}</div></div>
       <div class="log-body">
         <div class="log-title">${a.name}</div>
         <div class="log-meta">
           ${chipT(a.type)}
-          <span>📍 ${a.location||'—'}</span>
-          <span>👤 ${a.pic||'—'}</span>
-          <span>👥 ${a.participants||0} peserta</span>
-          ${a.time?`<span>🕐 ${a.time}</span>`:''}
+          <span>📍 ${a.location || '—'}</span>
+          <span>👤 ${a.pic || '—'}</span>
+          <span>👥 ${a.participants || 0} peserta</span>
+          ${a.time ? `<span>🕐 ${a.time}</span>` : ''}
         </div>
-        ${a.desc?`<div class="log-desc">${a.desc}</div>`:''}
+        ${a.desc ? `<div class="log-desc">${a.desc}</div>` : ''}
       </div>
       <div class="log-side">
         ${chipS(a.status)}
         <button class="ico-btn" onclick="openActivityModal(${a.id})">✏️</button>
       </div>
     </div>`;
-  }).join('');
-}
-
-// ── BOOT ──
-async function boot() {
-  const { data: { session } } = await db.auth.getSession();
-  hideLoading();
-  if(session) {
-    showApp(session.user);
-    const ok = await fetchAll();
-    if(ok) { renderDash(); subscribeRT(); }
-  } else {
-    showAuth();
-  }
-
-  db.auth.onAuthStateChange(async (event, session) => {
-    if(event==='SIGNED_IN' && session) {
-      showApp(session.user);
-      const ok = await fetchAll();
-      if(ok) { renderDash(); subscribeRT(); }
+      }).join('');
     }
-    if(event==='SIGNED_OUT') { showAuth(); activities=[]; plans=[]; }
-  });
-}
 
-// responsive
-function checkW() {
-  document.getElementById('hamburger').style.display = window.innerWidth<=960?'flex':'none';
-}
-window.addEventListener('resize', checkW);
-checkW();
+    // ── BOOT ──
+    async function boot() {
+      const { data: { session } } = await db.auth.getSession();
+      hideLoading();
+      if (session) {
+        showApp(session.user);
+        const ok = await fetchAll();
+        if (ok) { renderDash(); subscribeRT(); }
+      } else {
+        showAuth();
+      }
 
-// keyboard support
-document.addEventListener('keydown', e=>{
-  if(e.key==='Escape') {
-    document.getElementById('act-overlay').classList.remove('open');
-    document.getElementById('plan-overlay').classList.remove('open');
-  }
-  if(e.key==='Enter' && document.getElementById('auth-screen').classList.contains('show')) {
-    if(document.getElementById('form-login').style.display!=='none') doLogin();
-    else doRegister();
-  }
-});
+      db.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          showApp(session.user);
+          const ok = await fetchAll();
+          if (ok) { renderDash(); subscribeRT(); }
+        }
+        if (event === 'SIGNED_OUT') { showAuth(); activities = []; plans = []; }
+      });
+    }
 
-boot();
-</script>
+    // responsive
+    function checkW() {
+      document.getElementById('hamburger').style.display = window.innerWidth <= 960 ? 'flex' : 'none';
+    }
+    window.addEventListener('resize', checkW);
+    checkW();
+
+    // keyboard support
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.getElementById('act-overlay').classList.remove('open');
+        document.getElementById('plan-overlay').classList.remove('open');
+      }
+      if (e.key === 'Enter' && document.getElementById('auth-screen').classList.contains('show')) {
+        if (document.getElementById('form-login').style.display !== 'none') doLogin();
+        else doRegister();
+      }
+    });
+
+    boot();
+  </script>
 </body>
+
 </html>
