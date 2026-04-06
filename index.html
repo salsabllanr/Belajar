@@ -1724,7 +1724,7 @@
     </div>`;
       }).join('');
 
-      const targets = { FGD: 4, seminar: 3, sharing: 5, other: 3 };
+      const targets = { FGD: 4, seminar: 3, sharing: 5, other: 10 };
       const typeOrder = ['FGD', 'seminar', 'sharing', 'other'];
       document.getElementById('target-table').innerHTML = typeOrder.map(t => {
         const done = activities.filter(a => a.type === t && a.status === 'done').length;
