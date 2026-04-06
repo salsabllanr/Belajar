@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GSA UNMUL — Activity Tracker</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --google-blue: #1a73e8;
+      --google-red: #ea4335;
+      --google-yellow: #fbbc04;
+      --google-green: #34a853;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --surface2: #f1f3f4;
+      --text: #1f2124;
+      --text-muted: #5f6368;
+      --border: #e0e0e0;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ── LOADING SCREEN ── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 9999;
+      transition: opacity .3s ease;
+    }
+
+    .loading-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .loading-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: bounce .8s infinite alternate;
+    }
+
+    .loading-dot:nth-child(1) {
+      background: var(--google-blue);
+      animation-delay: 0s;
+    }
+
+    .loading-dot:nth-child(2) {
+      background: var(--google-red);
+      animation-delay: .15s;
+    }
+
+    .loading-dot:nth-child(3) {
+      background: var(--google-yellow);
+      animation-delay: .3s;
+    }
+
+    .loading-dot:nth-child(4) {
+      background: var(--google-green);
+      animation-delay: .45s;
+    }
+
+    @keyframes bounce {
+      from {
+        transform: translateY(0);
+      }
+
+      to {
+        transform: translateY(-10px);
+      }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform .25s ease;
+    }
+
+    .sidebar-header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-dots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .logo-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px;
+      line-height: 1.1;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px 10px;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      margin-bottom: 20px;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      padding: 0 10px;
+      margin-bottom: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 400;
+      color: var(--text-muted);
+      transition: all .15s ease;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: #e8f0fe;
+      color: var(--google-blue);
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      font-size: 17px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .db-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .db-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ccc;
+    }
+
+    .db-dot.connected {
+      background: var(--google-green);
+    }
+
+    .db-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 240px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 90;
+    }
+
+    .topbar-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-google {
+      display: flex;
+      gap: 2px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    .badge-google span:nth-child(1) {
+      color: var(--google-blue);
+    }
+
+    .badge-google span:nth-child(2) {
+      color: var(--google-red);
+    }
+
+    .badge-google span:nth-child(3) {
+      color: var(--google-yellow);
+    }
+
+    .badge-google span:nth-child(4) {
+      color: var(--google-blue);
+    }
+
+    .badge-google span:nth-child(5) {
+      color: var(--google-green);
+    }
+
+    .badge-google span:nth-child(6) {
+      color: var(--google-red);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .15s ease;
+    }
+
+    .btn-primary {
+      background: var(--google-blue);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #1557b0;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .content {
+      padding: 28px;
+      flex: 1;
+    }
+
+    /* ── VIEWS ── */
+    .view {
+      display: none;
+      animation: fadeIn .2s ease;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid transparent;
+    }
+
+    .stat-card.blue {
+      border-color: var(--google-blue);
+    }
+
+    .stat-card.red {
+      border-color: var(--google-red);
+    }
+
+    .stat-card.yellow {
+      border-color: var(--google-yellow);
+    }
+
+    .stat-card.green {
+      border-color: var(--google-green);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      color: var(--text);
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+    }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--surface2);
+    }
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    td {
+      padding: 13px 16px;
+      font-size: 13.5px;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: #fafafa;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .03em;
+    }
+
+    .chip-done {
+      background: #e6f4ea;
+      color: #137333;
+    }
+
+    .chip-progress {
+      background: #e8f0fe;
+      color: #1967d2;
+    }
+
+    .chip-plan {
+      background: #fef7e0;
+      color: #b06000;
+    }
+
+    .chip-cancel {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    .chip-FGD {
+      background: #f3e8fd;
+      color: #7b1fa2;
+    }
+
+    .chip-seminar {
+      background: #e1f5fe;
+      color: #0277bd;
+    }
+
+    .chip-sharing {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .chip-other {
+      background: var(--surface2);
+      color: var(--text-muted);
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: background .15s;
+    }
+
+    .icon-btn:hover {
+      background: var(--surface2);
+    }
+
+    /* ── MODAL ── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .4);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 520px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+      animation: slideUp .2s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color .15s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--google-blue);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* ── CALENDAR ── */
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .cal-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+    }
+
+    .calendar-grid {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .cal-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: var(--surface2);
+    }
+
+    .cal-day-name {
+      padding: 10px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .cal-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-cell {
+      min-height: 90px;
+      padding: 8px;
+      border: 0.5px solid var(--border);
+      position: relative;
+    }
+
+    .cal-date {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin-bottom: 4px;
+    }
+
+    .cal-date.today {
+      background: var(--google-blue);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .cal-date.other-month {
+      color: #ccc;
+    }
+
+    .cal-event {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .cal-event.done {
+      background: #e6f4ea;
+      color: #137333;
+    }
+
+    .cal-event.progress {
+      background: #e8f0fe;
+      color: #1967d2;
+    }
+
+    .cal-event.plan {
+      background: #fef7e0;
+      color: #b06000;
+    }
+
+    .cal-event.cancel {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    /* ── ROADMAP ── */
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .plan-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .plan-card-header {
+      padding: 14px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .plan-card-header.q1 {
+      background: var(--google-blue);
+    }
+
+    .plan-card-header.q2 {
+      background: var(--google-green);
+    }
+
+    .plan-card-header.q3 {
+      background: var(--google-red);
+    }
+
+    .plan-card-header.q4 {
+      background: #9c27b0;
+    }
+
+    .plan-card-body {
+      padding: 14px 18px;
+    }
+
+    .plan-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .plan-item:last-child {
+      border-bottom: none;
+    }
+
+    .plan-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .plan-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .plan-item-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .plan-del {
+      margin-left: auto;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      opacity: .4;
+      transition: opacity .15s;
+    }
+
+    .plan-del:hover {
+      opacity: 1;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-section {
+      margin-top: 28px;
+    }
+
+    .progress-item {
+      margin-bottom: 16px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .5s ease;
+    }
+
+    /* ── LOG ── */
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .log-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .log-date-col {
+      flex-shrink: 0;
+      width: 54px;
+      text-align: center;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 8px 6px;
+    }
+
+    .log-day {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .log-month {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .log-body {
+      flex: 1;
+    }
+
+    .log-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .log-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .log-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .log-actions {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+    }
+
+    /* ── EMPTY ── */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .empty-msg {
+      font-size: 15px;
+    }
+
+    .empty-sub {
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .25s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .25);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.error {
+      background: var(--google-red);
+    }
+
+    .toast.success {
+      background: var(--google-green);
+    }
+
+    /* ── FILTER ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text-muted);
+      transition: all .15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .filter-chip:hover {
+      border-color: var(--google-blue);
+      color: var(--google-blue);
+    }
+
+    .filter-chip.active {
+      background: var(--google-blue);
+      border-color: var(--google-blue);
+      color: #fff;
+    }
+
+    .search-box {
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      font-size: 13px;
+      width: 220px;
+    }
+
+    /* ── SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface2) 25%, #e8e8e8 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    @keyframes shimmer {
+      from {
+        background-position: 200% 0;
+      }
+
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .plan-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOADING -->
+  <div id="loading-screen">
+    <div class="loading-dots">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+    <div class="loading-text">Menghubungkan ke Supabase...</div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-dots">
+          <div class="logo-dot" style="background:var(--google-blue)"></div>
+          <div class="logo-dot" style="background:var(--google-red)"></div>
+          <div class="logo-dot" style="background:var(--google-yellow)"></div>
+          <div class="logo-dot" style="background:var(--google-green)"></div>
+        </div>
+        <div>
+          <div class="logo-title">GSA UNMUL</div>
+          <div class="logo-sub">Activity Tracker</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Menu Utama</div>
+        <button class="nav-item active" onclick="switchView('dashboard')"><span class="nav-icon">🏠</span>
+          Dashboard</button>
+        <button class="nav-item" onclick="switchView('activities')"><span class="nav-icon">📋</span> Semua
+          Kegiatan</button>
+        <button class="nav-item" onclick="switchView('calendar')"><span class="nav-icon">📅</span> Kalender</button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Perencanaan</div>
+        <button class="nav-item" onclick="switchView('roadmap')"><span class="nav-icon">🗺️</span> Roadmap &
+          Plan</button>
+        <button class="nav-item" onclick="switchView('log')"><span class="nav-icon">📝</span> Log Kegiatan</button>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="db-status">
+        <div class="db-dot" id="db-dot"></div>
+        <span class="db-label" id="db-label">Menghubungkan...</span>
+      </div>
+      Google Student Ambassador<br>Universitas Mulawarman © 2025
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="icon-btn" id="menu-btn" onclick="toggleSidebar()" style="display:none;">☰</button>
+        <div class="topbar-title" id="page-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="badge-google"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">＋ Tambah Kegiatan</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="view active" id="view-dashboard">
+        <div class="stats-row">
+          <div class="stat-card blue">
+            <div class="stat-label">Total Kegiatan</div>
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-sub">Semua kegiatan tercatat</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Selesai</div>
+            <div class="stat-value" id="stat-done">—</div>
+            <div class="stat-sub">Kegiatan terlaksana</div>
+          </div>
+          <div class="stat-card yellow">
+            <div class="stat-label">Sedang Berjalan</div>
+            <div class="stat-value" id="stat-progress">—</div>
+            <div class="stat-sub">Dalam proses</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-label">Direncanakan</div>
+            <div class="stat-value" id="stat-plan">—</div>
+            <div class="stat-sub">Belum dilaksanakan</div>
+          </div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">Kegiatan Terbaru</div>
+          <button class="btn btn-outline" onclick="switchView('activities')">Lihat Semua →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nama Kegiatan</th>
+                <th>Tanggal</th>
+                <th>Jenis</th>
+                <th>Status</th>
+                <th>PIC</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-table">
+              <tr>
+                <td colspan="5">
+                  <div class="empty">
+                    <div class="empty-icon">⏳</div>
+                    <div class="empty-msg">Memuat data...</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="progress-section">
+          <div class="section-header" style="margin-bottom:16px;">
+            <div class="section-title">Progres Per Jenis</div>
+          </div>
+          <div id="progress-bars"></div>
+        </div>
+      </div>
+
+      <!-- ACTIVITIES -->
+      <div class="view" id="view-activities">
+        <div class="filter-bar">
+          <input type="text" class="search-box" placeholder="🔍 Cari kegiatan..." id="search-input"
+            oninput="renderActivities()">
+          <button class="filter-chip active" onclick="setFilter('all',this)">Semua</button>
+          <button class="filter-chip" onclick="setFilter('done',this)">✅ Selesai</button>
+          <button class="filter-chip" onclick="setFilter('progress',this)">🔵 Berjalan</button>
+          <button class="filter-chip" onclick="setFilter('plan',this)">🟡 Direncanakan</button>
+          <button class="filter-chip" onclick="setFilter('cancel',this)">❌ Dibatalkan</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nama Kegiatan</th>
+                <th>Tanggal</th>
+                <th>Jenis</th>
+                <th>Status</th>
+                <th>PIC</th>
+                <th>Peserta</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="activities-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div class="view" id="view-calendar">
+        <div class="calendar-nav">
+          <button class="btn btn-outline" onclick="changeMonth(-1)">← Prev</button>
+          <div class="cal-title" id="cal-title"></div>
+          <button class="btn btn-outline" onclick="changeMonth(1)">Next →</button>
+        </div>
+        <div class="calendar-grid">
+          <div class="cal-header">
+            <div class="cal-day-name">Min</div>
+            <div class="cal-day-name">Sen</div>
+            <div class="cal-day-name">Sel</div>
+            <div class="cal-day-name">Rab</div>
+            <div class="cal-day-name">Kam</div>
+            <div class="cal-day-name">Jum</div>
+            <div class="cal-day-name">Sab</div>
+          </div>
+          <div class="cal-body" id="cal-body"></div>
+        </div>
+      </div>
+
+      <!-- ROADMAP -->
+      <div class="view" id="view-roadmap">
+        <div class="section-header">
+          <div class="section-title">Roadmap Program 2025</div>
+          <button class="btn btn-primary" onclick="openPlanModal()">＋ Tambah Rencana</button>
+        </div>
+        <div class="plan-grid" id="plan-grid"></div>
+        <div class="section-header">
+          <div class="section-title">Pencapaian Target</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Program</th>
+                <th>Target</th>
+                <th>Terlaksana</th>
+                <th>Progres</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="target-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div class="view" id="view-log">
+        <div class="section-header">
+          <div class="section-title">Log Kegiatan</div>
+        </div>
+        <div class="log-list" id="log-list"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL KEGIATAN -->
+  <div class="overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Tambah Kegiatan</div>
+      <div class="form-group">
+        <label class="form-label">Nama Kegiatan *</label>
+        <input type="text" id="f-name" placeholder="Contoh: Workshop Machine Learning">
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tanggal *</label><input type="date" id="f-date"></div>
+        <div class="form-group"><label class="form-label">Jam</label><input type="time" id="f-time"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Jenis Kegiatan</label>
+          <select id="f-type">
+            <option value="FGD">FGD</option>
+            <option value="seminar">Seminar</option>
+            <option value="sharing">Sharing Session</option>
+            <option value="other">Lainnya</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="f-status">
+            <option value="plan">Direncanakan</option>
+            <option value="progress">Sedang Berjalan</option>
+            <option value="done">Selesai</option>
+            <option value="cancel">Dibatalkan</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Lokasi</label><input type="text" id="f-location"
+            placeholder="Contoh: Gedung Rektorat UNMUL"></div>
+        <div class="form-group"><label class="form-label">Jumlah Peserta</label><input type="number" id="f-participants"
+            placeholder="0" min="0"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Penanggung Jawab (PIC)</label><input type="text" id="f-pic"
+          placeholder="Nama ambassador"></div>
+      <div class="form-group"><label class="form-label">Deskripsi / Catatan</label><textarea id="f-desc"
+          placeholder="Deskripsi kegiatan, goals, atau catatan penting..."></textarea></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" id="save-btn" onclick="saveActivity()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PLAN -->
+  <div class="overlay" id="plan-modal-overlay" onclick="closePlanModal(event)">
+    <div class="modal">
+      <div class="modal-title">Tambah Rencana Program</div>
+      <div class="form-group"><label class="form-label">Nama Program *</label><input type="text" id="p-name"
+          placeholder="Contoh: Workshop AI for Beginners"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Kuartal</label>
+          <select id="p-quarter">
+            <option value="Q1">Q1 (April)</option>
+            <option value="Q2">Q2 (Mei)</option>
+            <option value="Q3">Q3 (Juni)</option>
+            <option value="Q4">Q4 (Juli)</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Target Bulan</label><input type="month" id="p-month"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Deskripsi</label><textarea id="p-desc"
+          placeholder="Tujuan dan gambaran program..."></textarea></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closePlanModal()">Batal</button>
+        <button class="btn btn-primary" id="save-plan-btn" onclick="savePlan()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── SUPABASE INIT ──
+    const SUPABASE_URL = 'https://vjzuavwxasvpxsruqlnz.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_9vuet4x3OMq1JAto8TdMug_JutSrv5b';
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ── STATE ──
+    let activities = [];
+    let plans = [];
+    let currentFilter = 'all';
+    let calDate = new Date();
+    let editingId = null;
+    let isConnected = false;
+
+    // ── HELPERS ──
+    const statusLabel = { done: 'Selesai', progress: 'Berjalan', plan: 'Direncanakan', cancel: 'Dibatalkan' };
+    const typeLabel = { FGD: 'FGD', seminar: 'Seminar', sharing: 'Sharing', other: 'Lainnya' };
+    const typeColor = { FGD: '#9c27b0', seminar: '#0277bd', sharing: '#2e7d32', other: '#9e9e9e' };
+    const mn = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    function chipStatus(s) {
+      const map = { done: 'chip-done', progress: 'chip-progress', plan: 'chip-plan', cancel: 'chip-cancel' };
+      return `<span class="chip ${map[s] || ''}">${statusLabel[s] || s}</span>`;
+    }
+    function chipType(t) {
+      return `<span class="chip chip-${t}">${typeLabel[t] || t}</span>`;
+    }
+    function fmtDate(d) {
+      if (!d) return '-';
+      const parts = d.split('-');
+      return `${parseInt(parts[2])} ${mn[parseInt(parts[1]) - 1]} ${parts[0]}`;
+    }
+
+    let toastTimer;
+    function showToast(msg, type = '') {
+      clearTimeout(toastTimer);
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = 'toast show ' + type;
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function setDBStatus(connected) {
+      isConnected = connected;
+      const dot = document.getElementById('db-dot');
+      const lbl = document.getElementById('db-label');
+      dot.className = 'db-dot' + (connected ? ' connected' : '');
+      lbl.textContent = connected ? 'Terhubung ke Supabase' : 'Tidak terhubung';
+    }
+
+    function hideLoading() {
+      const el = document.getElementById('loading-screen');
+      el.style.opacity = '0';
+      setTimeout(() => el.style.display = 'none', 300);
+    }
+
+    // ── DATA FETCHING ──
+    async function fetchActivities() {
+      const { data, error } = await db.from('activities').select('*').order('date', { ascending: false });
+      if (error) { console.error(error); return; }
+      activities = data || [];
+    }
+
+    async function fetchPlans() {
+      const { data, error } = await db.from('plans').select('*').order('month', { ascending: true });
+      if (error) { console.error(error); return; }
+      plans = data || [];
+    }
+
+    async function loadAll() {
+      try {
+        await Promise.all([fetchActivities(), fetchPlans()]);
+        setDBStatus(true);
+      } catch (e) {
+        setDBStatus(false);
+        showToast('Gagal terhubung ke database', 'error');
+      }
+      hideLoading();
+      renderDashboard();
+    }
+
+    // ── REAL-TIME ──
+    function subscribeRealtime() {
+      db.channel('realtime-activities')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'activities' }, async () => {
+          await fetchActivities();
+          renderDashboard(); renderActivities(); renderCalendar(); renderLog();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'plans' }, async () => {
+          await fetchPlans();
+          renderRoadmap();
+        })
+        .subscribe();
+    }
+
+    // ── NAV ──
+    function switchView(v) {
+      document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + v).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(el => {
+        if (el.getAttribute('onclick').includes("'" + v + "'")) el.classList.add('active');
+      });
+      const titles = { dashboard: 'Dashboard', activities: 'Semua Kegiatan', calendar: 'Kalender', roadmap: 'Roadmap & Plan', log: 'Log Kegiatan' };
+      document.getElementById('page-title').textContent = titles[v] || v;
+      if (v === 'dashboard') renderDashboard();
+      if (v === 'activities') renderActivities();
+      if (v === 'calendar') renderCalendar();
+      if (v === 'roadmap') renderRoadmap();
+      if (v === 'log') renderLog();
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+    // ── MODAL KEGIATAN ──
+    function openModal(id) {
+      editingId = id || null;
+      if (id) {
+        const a = activities.find(x => x.id === id);
+        document.getElementById('modal-title').textContent = 'Edit Kegiatan';
+        document.getElementById('f-name').value = a.name;
+        document.getElementById('f-date').value = a.date;
+        document.getElementById('f-time').value = a.time || '';
+        document.getElementById('f-type').value = a.type;
+        document.getElementById('f-status').value = a.status;
+        document.getElementById('f-location').value = a.location || '';
+        document.getElementById('f-participants').value = a.participants || '';
+        document.getElementById('f-pic').value = a.pic || '';
+        document.getElementById('f-desc').value = a.desc || '';
+      } else {
+        document.getElementById('modal-title').textContent = 'Tambah Kegiatan';
+        ['f-name', 'f-date', 'f-time', 'f-location', 'f-participants', 'f-pic', 'f-desc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('f-type').value = 'FGD';
+        document.getElementById('f-status').value = 'plan';
+      }
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal(e) {
+      if (!e || e.target === document.getElementById('modal-overlay'))
+        document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    async function saveActivity() {
+      const name = document.getElementById('f-name').value.trim();
+      const date = document.getElementById('f-date').value;
+      if (!name || !date) { showToast('Nama dan tanggal wajib diisi!', 'error'); return; }
+
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      const payload = {
+        name, date,
+        time: document.getElementById('f-time').value || null,
+        type: document.getElementById('f-type').value,
+        status: document.getElementById('f-status').value,
+        location: document.getElementById('f-location').value || null,
+        participants: parseInt(document.getElementById('f-participants').value) || 0,
+        pic: document.getElementById('f-pic').value || null,
+        desc: document.getElementById('f-desc').value || null,
+      };
+
+      let error;
+      if (editingId) {
+        ({ error } = await db.from('activities').update(payload).eq('id', editingId));
+      } else {
+        ({ error } = await db.from('activities').insert(payload));
+      }
+
+      btn.disabled = false; btn.textContent = 'Simpan';
+
+      if (error) { showToast('Gagal menyimpan: ' + error.message, 'error'); return; }
+      showToast(editingId ? 'Kegiatan berhasil diperbarui!' : 'Kegiatan berhasil ditambahkan!', 'success');
+      closeModal();
+      await fetchActivities();
+      renderDashboard(); renderActivities(); renderCalendar(); renderLog();
+    }
+
+    async function deleteActivity(id) {
+      if (!confirm('Yakin ingin menghapus kegiatan ini?')) return;
+      const { error } = await db.from('activities').delete().eq('id', id);
+      if (error) { showToast('Gagal menghapus: ' + error.message, 'error'); return; }
+      showToast('Kegiatan dihapus.', 'success');
+      await fetchActivities();
+      renderDashboard(); renderActivities(); renderCalendar(); renderLog();
+    }
+
+    // ── MODAL PLAN ──
+    function openPlanModal() { document.getElementById('plan-modal-overlay').classList.add('open'); }
+    function closePlanModal(e) {
+      if (!e || e.target === document.getElementById('plan-modal-overlay')) {
+        document.getElementById('plan-modal-overlay').classList.remove('open');
+        ['p-name', 'p-month', 'p-desc'].forEach(id => document.getElementById(id).value = '');
+      }
+    }
+
+    async function savePlan() {
+      const name = document.getElementById('p-name').value.trim();
+      if (!name) { showToast('Nama program wajib diisi!', 'error'); return; }
+
+      const btn = document.getElementById('save-plan-btn');
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      const { error } = await db.from('plans').insert({
+        name,
+        quarter: document.getElementById('p-quarter').value,
+        month: document.getElementById('p-month').value || null,
+        desc: document.getElementById('p-desc').value || null,
+      });
+
+      btn.disabled = false; btn.textContent = 'Simpan';
+      if (error) { showToast('Gagal menyimpan: ' + error.message, 'error'); return; }
+      showToast('Rencana berhasil ditambahkan!', 'success');
+      closePlanModal();
+      await fetchPlans();
+      renderRoadmap();
+    }
+
+    async function deletePlan(id) {
+      if (!confirm('Yakin ingin menghapus rencana ini?')) return;
+      const { error } = await db.from('plans').delete().eq('id', id);
+      if (error) { showToast('Gagal menghapus', 'error'); return; }
+      showToast('Rencana dihapus.', 'success');
+      await fetchPlans();
+      renderRoadmap();
+    }
+
+    // ── RENDER DASHBOARD ──
+    function renderDashboard() {
+      document.getElementById('stat-total').textContent = activities.length;
+      document.getElementById('stat-done').textContent = activities.filter(a => a.status === 'done').length;
+      document.getElementById('stat-progress').textContent = activities.filter(a => a.status === 'progress').length;
+      document.getElementById('stat-plan').textContent = activities.filter(a => a.status === 'plan').length;
+
+      const recent = [...activities].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+      const tbody = document.getElementById('dashboard-table');
+      tbody.innerHTML = recent.length
+        ? recent.map(a => `<tr>
+        <td><strong>${a.name}</strong></td>
+        <td>${fmtDate(a.date)}</td>
+        <td>${chipType(a.type)}</td>
+        <td>${chipStatus(a.status)}</td>
+        <td>${a.pic || '-'}</td>
+      </tr>`).join('')
+        : '<tr><td colspan="5"><div class="empty"><div class="empty-icon">📂</div><div class="empty-msg">Belum ada kegiatan</div><div class="empty-sub">Tambahkan kegiatan pertama kamu</div></div></td></tr>';
+
+      const types = ['FGD', 'seminar', 'sharing', 'other'];
+      const counts = types.map(t => activities.filter(a => a.type === t).length);
+      const max = Math.max(...counts, 1);
+      document.getElementById('progress-bars').innerHTML = types.map((t, i) => {
+        const pct = Math.round(counts[i] / max * 100);
+        return `<div class="progress-item">
+      <div class="progress-label"><span>${typeLabel[t]}</span><span>${counts[i]} kegiatan</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${typeColor[t]}"></div></div>
+    </div>`;
+      }).join('');
+    }
+
+    // ── RENDER ACTIVITIES ──
+    function renderActivities() {
+      const q = (document.getElementById('search-input').value || '').toLowerCase();
+      const list = activities.filter(a => {
+        const matchFilter = currentFilter === 'all' || a.status === currentFilter;
+        const matchSearch = !q || a.name.toLowerCase().includes(q) || (a.pic || '').toLowerCase().includes(q);
+        return matchFilter && matchSearch;
+      }).sort((a, b) => b.date.localeCompare(a.date));
+
+      const tbody = document.getElementById('activities-table');
+      tbody.innerHTML = list.length
+        ? list.map(a => `<tr>
+        <td><strong>${a.name}</strong><br><small style="color:var(--text-muted)">${a.location || ''}</small></td>
+        <td>${fmtDate(a.date)}</td>
+        <td>${chipType(a.type)}</td>
+        <td>${chipStatus(a.status)}</td>
+        <td>${a.pic || '-'}</td>
+        <td>${a.participants || 0} orang</td>
+        <td><div class="action-btns">
+          <button class="icon-btn" title="Edit" onclick="openModal(${a.id})">✏️</button>
+          <button class="icon-btn" title="Hapus" onclick="deleteActivity(${a.id})">🗑️</button>
+        </div></td>
+      </tr>`).join('')
+        : '<tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div><div class="empty-msg">Tidak ada kegiatan ditemukan</div></div></td></tr>';
+    }
+
+    function setFilter(f, btn) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderActivities();
+    }
+
+    // ── RENDER CALENDAR ──
+    function renderCalendar() {
+      const y = calDate.getFullYear(), m = calDate.getMonth();
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      document.getElementById('cal-title').textContent = months[m] + ' ' + y;
+
+      const first = new Date(y, m, 1).getDay();
+      const days = new Date(y, m + 1, 0).getDate();
+      const today = new Date();
+      let html = '';
+
+      for (let i = 0; i < first; i++) {
+        const d = new Date(y, m, -first + i + 1);
+        html += `<div class="cal-cell"><div class="cal-date other-month">${d.getDate()}</div></div>`;
+      }
+      for (let d = 1; d <= days; d++) {
+        const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isToday = today.getFullYear() === y && today.getMonth() === m && today.getDate() === d;
+        const evts = activities.filter(a => a.date === ds);
+        html += `<div class="cal-cell">
+      <div class="cal-date ${isToday ? 'today' : ''}">${d}</div>
+      ${evts.map(a => `<div class="cal-event ${a.status}" title="${a.name}" onclick="openModal(${a.id})">${a.name}</div>`).join('')}
+    </div>`;
+      }
+      const rem = (7 - (first + days) % 7) % 7;
+      for (let i = 1; i <= rem; i++)
+        html += `<div class="cal-cell"><div class="cal-date other-month">${i}</div></div>`;
+
+      document.getElementById('cal-body').innerHTML = html;
+    }
+
+    function changeMonth(d) { calDate.setMonth(calDate.getMonth() + d); renderCalendar(); }
+
+    // ── RENDER ROADMAP ──
+    function renderRoadmap() {
+      const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+      const qLabels = { Q1: 'Q1 — Jan s/d Mar', Q2: 'Q2 — Apr s/d Jun', Q3: 'Q3 — Jul s/d Sep', Q4: 'Q4 — Okt s/d Des' };
+      const qDots = { Q1: var_blue, Q2: var_green, Q3: var_red, Q4: '#9c27b0' };
+
+      document.getElementById('plan-grid').innerHTML = quarters.map(q => {
+        const qp = plans.filter(p => p.quarter === q);
+        return `<div class="plan-card">
+      <div class="plan-card-header ${q.toLowerCase()}">${qLabels[q]} <span>${qp.length} program</span></div>
+      <div class="plan-card-body">
+        ${qp.length ? qp.map(p => `<div class="plan-item">
+          <div class="plan-dot" style="background:${qDots[q]}"></div>
+          <div style="flex:1">
+            <div class="plan-item-title">${p.name}</div>
+            <div class="plan-item-date">${p.month ? fmtDate(p.month + '-01').split(' ').slice(1).join(' ') : 'Belum ditetapkan'}</div>
+            ${p.desc ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px">${p.desc}</div>` : ''}
+          </div>
+          <button class="plan-del" onclick="deletePlan(${p.id})">✕</button>
+        </div>`).join('') : '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">Belum ada rencana</div>'}
+      </div>
+    </div>`;
+      }).join('');
+
+      const targets = { FGD: 4, seminar: 3, sharing: 5, other: 3 };
+      const typeOrder = ['FGD', 'seminar', 'sharing', 'other'];
+      document.getElementById('target-table').innerHTML = typeOrder.map(t => {
+        const done = activities.filter(a => a.type === t && a.status === 'done').length;
+        const target = targets[t];
+        const pct = Math.min(Math.round(done / target * 100), 100);
+        const badge = pct >= 100
+          ? '<span class="chip chip-done">Tercapai</span>'
+          : pct >= 50
+            ? '<span class="chip chip-progress">On Track</span>'
+            : '<span class="chip chip-plan">Di Bawah Target</span>';
+        return `<tr>
+      <td>${chipType(t)}</td>
+      <td>${target}x</td>
+      <td>${done}x</td>
+      <td><div class="progress-bar" style="width:160px;height:6px"><div class="progress-fill" style="width:${pct}%;background:${typeColor[t]}"></div></div></td>
+      <td>${badge}</td>
+    </tr>`;
+      }).join('');
+    }
+
+    // ── RENDER LOG ──
+    function renderLog() {
+      const sorted = [...activities].sort((a, b) => b.date.localeCompare(a.date));
+      if (!sorted.length) {
+        document.getElementById('log-list').innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-msg">Belum ada log kegiatan</div></div>';
+        return;
+      }
+      document.getElementById('log-list').innerHTML = sorted.map(a => {
+        const [y, m, d] = a.date.split('-');
+        return `<div class="log-card">
+      <div class="log-date-col"><div class="log-day">${parseInt(d)}</div><div class="log-month">${mn[parseInt(m) - 1]} ${y}</div></div>
+      <div class="log-body">
+        <div class="log-title">${a.name}</div>
+        <div class="log-meta">
+          <span>${chipType(a.type)}</span>
+          <span>📍 ${a.location || '-'}</span>
+          <span>👤 ${a.pic || '-'}</span>
+          <span>👥 ${a.participants || 0} peserta</span>
+          ${a.time ? `<span>🕐 ${a.time}</span>` : ''}
+        </div>
+        ${a.desc ? `<div class="log-desc">${a.desc}</div>` : ''}
+      </div>
+      <div class="log-actions">
+        ${chipStatus(a.status)}
+        <button class="icon-btn" onclick="openModal(${a.id})">✏️</button>
+      </div>
+    </div>`;
+      }).join('');
+    }
+
+    // color vars for JS
+    const var_blue = '#1a73e8';
+    const var_green = '#34a853';
+    const var_red = '#ea4335';
+
+    // ── RESPONSIVE ──
+    function checkWidth() {
+      document.getElementById('menu-btn').style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+    }
+    window.addEventListener('resize', checkWidth);
+    checkWidth();
+
+    // ── BOOT ──
+    loadAll().then(() => subscribeRealtime());
+  </script>
+</body>
+
+</html>
